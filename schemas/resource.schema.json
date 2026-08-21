@@ -1,0 +1,833 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/resource.schema.json",
+  "title": "resource",
+  "description": "资源：Resource Registry 的统一资源格式（Phase-4 Prompt §8）。一条 resource 代表一个可被检索、预览、按需获取的外部资源条目（动效/转场/组件/3D/音频/字体/参考等）；Registry 只保存其元数据与缓存状态，不保存素材全集（§4）。与 provider（provider.schema.json）多对一；与项目 Asset（asset.schema.json）通过 registry_resource_id 回链（§85-86）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "type",
+    "name",
+    "provider",
+    "source_url",
+    "summary",
+    "resource_nature",
+    "tags",
+    "best_for",
+    "avoid_when",
+    "style",
+    "status",
+    "availability",
+    "verification_status",
+    "preview",
+    "license",
+    "local_state",
+    "metadata_version",
+    "last_verified",
+    "added_by",
+    "added_at",
+    "discovery_source"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+:[a-z0-9_-]+:[a-z0-9._-]+$",
+      "description": "Resource ID，格式 {provider}:{type}:{slug}（§9），如 remotion-bits:motion_effect:gradient-text-shimmer；provider 段为稳定 provider ID（小写+连字符），type 段为 Resource Type 枚举小写形式，slug 段为条目唯一标识。"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "MOTION_EFFECT",
+        "TRANSITION",
+        "SHOT_RECIPE",
+        "REMOTION_COMPONENT",
+        "THREE_D_MODEL",
+        "TEXTURE",
+        "HDRI",
+        "FOOTAGE",
+        "IMAGE",
+        "SFX",
+        "MUSIC",
+        "SOUNDFONT",
+        "FONT",
+        "REFERENCE",
+        "OTHER"
+      ],
+      "description": "Resource Type（§10）：15 枚举。"
+    },
+    "name": {
+      "type": "string",
+      "description": "资源显示名称。"
+    },
+    "provider": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "来源 Provider 的稳定 ID（对应 provider.schema.json 的 id，如 remotion-bits / polyhaven / freesound）。"
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "资源原始来源 URL（GitHub 文件 / 官方页 / API 详情页）；必须真实可验证，禁止编造（§91）。"
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "一句话摘要（≤500 字符），用于搜索结果展示。"
+    },
+    "description": {
+      "type": "string",
+      "description": "详细描述（Level 1 Detail 字段，可选）：使用方式、参数、限制等。"
+    },
+    "resource_nature": {
+      "type": "string",
+      "enum": [
+        "KNOWLEDGE",
+        "CODE",
+        "MEDIA",
+        "MODEL",
+        "PACKAGE"
+      ],
+      "description": "资源本质（§20）：KNOWLEDGE=知识/规则；CODE=可复用代码/组件；MEDIA=媒体素材；MODEL=数字模型（3D/音色/字体）；PACKAGE=可安装包。"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 15,
+      "description": "标签（§76-79 Tag Taxonomy 三类基础词表），小写 kebab-case，≤15 个。"
+    },
+    "best_for": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "description": "最适合的场景/用途（配合 tag taxonomy 的用途类词表）。"
+    },
+    "avoid_when": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "description": "应避免使用该资源的情形。"
+    },
+    "style": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "description": "匹配的视觉风格标签（供 style_fit 排序因子使用）。"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "DEPRECATED",
+        "RETIRED"
+      ],
+      "description": "资源在 Registry 中的生命周期状态：ACTIVE=可被搜索推荐；DEPRECATED=不推荐新使用但保留；RETIRED=下架（不删除历史）。"
+    },
+    "availability": {
+      "type": "string",
+      "enum": [
+        "REMOTE_ONLINE",
+        "REMOTE_OFFLINE",
+        "LOCAL_ONLY",
+        "UNKNOWN"
+      ],
+      "description": "资源可用性：REMOTE_ONLINE=远端可访问；REMOTE_OFFLINE=远端不可达；LOCAL_ONLY=仅本地存在；UNKNOWN=未确认。"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "CURRENT",
+        "STALE",
+        "BROKEN",
+        "UNKNOWN"
+      ],
+      "description": "验证状态（§67-69）：CURRENT=最近验证可用；STALE=超过验证有效期；BROKEN=来源不可达/404；UNKNOWN=从未验证。"
+    },
+    "family_id": {
+      "type": "string",
+      "description": "家族 ID（§118-121，可选）：同系列变体共享（典型：SFX/Motion 家族）；家族内一次 fetch 可跨资源复用，搜索时只返回 leader+成员列表。"
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "description": "别名（§75，可选）：旧 id/常见别名，解析时指向主 id，不建立重复条目。"
+    },
+    "estimated_size_bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "估算获取体积（字节），供 Fetch 分类与体积排序（size_cost 因子）使用。"
+    },
+    "preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "url"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "image",
+            "gif",
+            "video",
+            "audio",
+            "waveform",
+            "external_url",
+            "generated_preview",
+            "none"
+          ],
+          "description": "预览类型（8 枚举）。"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "预览地址（可为外部 URL；type=none 时可为空字符串）。"
+        },
+        "local_path": {
+          "type": "string",
+          "description": "本地预览路径（可选，PREVIEW_CACHED 时存在）。"
+        }
+      },
+      "description": "预览信息（§8 顶层字段之一）。"
+    },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "license_type",
+        "license_url",
+        "commercial_use",
+        "attribution_required",
+        "derivatives_allowed",
+        "redistribution_allowed",
+        "license_notes",
+        "license_review_required"
+      ],
+      "properties": {
+        "license_type": {
+          "type": "string",
+          "description": "许可证类型（如 MIT / CC0-1.0 / CC-BY-4.0 / GPL-3.0）；未知时必须写 UNKNOWN（§61），禁止猜测。"
+        },
+        "license_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "许可证原文链接。"
+        },
+        "commercial_use": {
+          "type": "boolean",
+          "description": "是否允许商用（禁止猜测；未知时 license_review_required=true）。"
+        },
+        "attribution_required": {
+          "type": "boolean",
+          "description": "是否要求署名（§63：要求署名时必须记录 attribution 并写入 asset 元数据）。"
+        },
+        "derivatives_allowed": {
+          "type": "boolean",
+          "description": "是否允许衍生。"
+        },
+        "redistribution_allowed": {
+          "type": "boolean",
+          "description": "是否允许再分发。"
+        },
+        "license_notes": {
+          "type": "string",
+          "description": "许可证备注（提供方原文/获取途径/双许可说明）。"
+        },
+        "license_review_required": {
+          "type": "boolean",
+          "description": "§61：license_type=UNKNOWN 或任一 license 判定字段缺失时必须为 true，要求人工/审核确认后才可用于生产。"
+        }
+      },
+      "description": "许可证（§60-64 硬需求，必填）。"
+    },
+    "local_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cache_state"
+      ],
+      "properties": {
+        "cache_state": {
+          "type": "string",
+          "enum": [
+            "NOT_CACHED",
+            "METADATA_CACHED",
+            "PREVIEW_CACHED",
+            "PAYLOAD_CACHED",
+            "INSTALLED"
+          ],
+          "description": "本地缓存状态（5 枚举，§57-58）。"
+        },
+        "local_path": {
+          "type": "string",
+          "description": "本地缓存路径（PAYLOAD_CACHED/INSTALLED 时存在；须经安全校验，禁止逃出缓存根目录，§100）。"
+        },
+        "checksum": {
+          "type": "string",
+          "description": "内容校验和（如 sha256），用于完整性校验。"
+        },
+        "version": {
+          "type": "string",
+          "description": "已缓存版本号。"
+        },
+        "downloaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "下载时间（ISO 8601）。"
+        },
+        "license_snapshot": {
+          "type": "string",
+          "description": "获取时点许可证快照（来源 URL + 许可证原文/哈希），fetch 时落盘（§64）。"
+        }
+      },
+      "description": "本地缓存状态（§57-58）。"
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "npm_packages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "npm 依赖包列表。"
+        },
+        "python_packages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Python 依赖包列表。"
+        },
+        "peer_dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "peer 依赖列表。"
+        },
+        "remotion_compat": {
+          "type": "string",
+          "description": "Remotion 兼容版本说明，如 \">=4.0.0\"；未知写 UNKNOWN。"
+        },
+        "react_compat": {
+          "type": "string",
+          "description": "React 兼容版本说明，如 \">=18\"；未知写 UNKNOWN。"
+        },
+        "threejs_requirements": {
+          "type": "string",
+          "description": "Three.js 要求（版本/扩展），无则写 none。"
+        }
+      },
+      "description": "依赖与兼容性（§65，可选）。"
+    },
+    "type_specific": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "motion": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "motion_type": {
+              "type": "string",
+              "description": "动效类型，如 text-shimmer / gradient-move / wipe。"
+            },
+            "motion_tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 20,
+              "description": "动效标签（家族/行为特征）。"
+            }
+          },
+          "description": "MOTION_EFFECT 专用字段。"
+        },
+        "shot_recipe": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "motion_character": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "运动特征（如 2.5D 推拉 / 摇移）。"
+            },
+            "camera_style": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "运镜风格（如 push-in / orbit / handheld）。"
+            }
+          },
+          "description": "SHOT_RECIPE 专用字段。"
+        },
+        "3d": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "category": {
+              "type": "string",
+              "description": "模型类别，如 product / vehicle / architecture / character。"
+            },
+            "realism": {
+              "type": "string",
+              "description": "写实程度，如 stylized / semi-realistic / photoreal；未知写 UNKNOWN。"
+            },
+            "formats": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "可用格式，如 glb / gltf / fbx / obj。"
+            },
+            "texture_resolutions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "贴图分辨率，如 2k / 4k / 8k。"
+            },
+            "poly_count_range": {
+              "type": "string",
+              "description": "多边形数范围描述，如 10k-100k。"
+            }
+          },
+          "description": "THREE_D_MODEL 专用字段。"
+        },
+        "texture": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "material_type": {
+              "type": "string",
+              "description": "材质类型，如 metal / wood / fabric。"
+            },
+            "resolution": {
+              "type": "string",
+              "description": "分辨率，如 2k / 4k / 8k。"
+            },
+            "maps": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "贴图种类，如 diffuse / normal / roughness / ao。"
+            },
+            "tileable": {
+              "type": "boolean",
+              "description": "是否可平铺。"
+            }
+          },
+          "description": "TEXTURE 专用字段。"
+        },
+        "hdri": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "environment_type": {
+              "type": "string",
+              "description": "环境类型，如 studio / outdoor / interior。"
+            },
+            "lighting_character": {
+              "type": "string",
+              "description": "光照特征，如 soft / harsh / golden-hour。"
+            },
+            "indoor_outdoor": {
+              "type": "string",
+              "enum": [
+                "INDOOR",
+                "OUTDOOR",
+                "BOTH",
+                "UNKNOWN"
+              ],
+              "description": "室内/室外。"
+            },
+            "day_night": {
+              "type": "string",
+              "enum": [
+                "DAY",
+                "NIGHT",
+                "DAWN_DUSK",
+                "ANY",
+                "UNKNOWN"
+              ],
+              "description": "昼夜时段。"
+            }
+          },
+          "description": "HDRI 专用字段。"
+        },
+        "sfx": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "category": {
+              "type": "string",
+              "enum": [
+                "UI",
+                "UI_CLICK",
+                "UI_HOVER",
+                "NOTIFICATION",
+                "ALERT",
+                "IMPACT",
+                "BOOM",
+                "EXPLOSION",
+                "WHOOSH",
+                "RISER",
+                "DROP",
+                "TRANSITION",
+                "SWIPE",
+                "FOLEY",
+                "FOOTSTEPS",
+                "CLOTH",
+                "MECHANICAL",
+                "DIGITAL",
+                "ORGANIC",
+                "AMBIENCE"
+              ],
+              "description": "SFX 分类（20 枚举，§25）；无法判定分类时省略本字段并用 character 自由描述，禁止猜测分类。"
+            },
+            "character": {
+              "type": "string",
+              "description": "声音特质自由描述。"
+            },
+            "intensity": {
+              "type": "string",
+              "description": "强度描述，如 subtle / medium / punchy。"
+            },
+            "duration": {
+              "type": "number",
+              "minimum": 0,
+              "description": "时长（秒）。"
+            },
+            "frequency_character": {
+              "type": "string",
+              "description": "频率特征，如 bright / dark / warm。"
+            },
+            "transient_character": {
+              "type": "string",
+              "description": "瞬态特征，如 sharp-attack / soft-attack。"
+            },
+            "tail": {
+              "type": "string",
+              "description": "尾音特征，如 long-tail / short-decay / none。"
+            }
+          },
+          "description": "SFX 专用字段。"
+        },
+        "music": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mood": {
+              "type": "string",
+              "description": "情绪，如 uplifting / calm / tense；未知写 UNKNOWN。"
+            },
+            "energy": {
+              "type": "string",
+              "enum": [
+                "VERY_LOW",
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "VERY_HIGH"
+              ],
+              "description": "能量级（5 枚举）。"
+            },
+            "bpm": {
+              "type": "number",
+              "minimum": 0,
+              "description": "BPM。"
+            },
+            "duration_seconds": {
+              "type": "number",
+              "minimum": 0,
+              "description": "时长（秒）。"
+            },
+            "genre": {
+              "type": "string",
+              "description": "曲风，如 electronic / cinematic / ambient。"
+            },
+            "instrumentation": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "配器列表，如 piano / strings / synth。"
+            },
+            "vocals": {
+              "type": "string",
+              "enum": [
+                "NONE",
+                "BACKGROUND",
+                "LEAD",
+                "UNKNOWN"
+              ],
+              "description": "人声情况。"
+            },
+            "narration_friendly": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "const": "UNKNOWN"
+                }
+              ],
+              "description": "是否适合旁白垫乐；未知标 UNKNOWN，不伪造。"
+            },
+            "loopable": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "const": "UNKNOWN"
+                }
+              ],
+              "description": "是否可无缝循环；未知标 UNKNOWN，不伪造。"
+            },
+            "build_structure": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string",
+                  "const": "UNKNOWN"
+                }
+              ],
+              "description": "是否有渐强结构；未知标 UNKNOWN，不伪造。"
+            },
+            "structure": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "曲式结构，如 intro / verse / chorus / outro。"
+            }
+          },
+          "description": "MUSIC 专用字段。"
+        },
+        "soundfont": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "format": {
+              "type": "string",
+              "description": "音色库格式，如 SF2 / SF3。"
+            },
+            "size_bytes": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "体积（字节）。"
+            },
+            "general_midi": {
+              "type": "boolean",
+              "description": "是否 GM 兼容。"
+            },
+            "instrument_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "乐器数量。"
+            },
+            "drum_kits": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "鼓组数量。"
+            },
+            "instrument_categories": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "乐器分类列表。"
+            },
+            "character": {
+              "type": "string",
+              "description": "音色特征描述。"
+            },
+            "installed": {
+              "type": "boolean",
+              "description": "是否已安装到 FluidSynth 可用路径（INSTALLED 状态依据）。"
+            }
+          },
+          "description": "SOUNDFONT 专用字段。"
+        },
+        "font": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "family": {
+              "type": "string",
+              "description": "字族名称。"
+            },
+            "weight": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "字重列表，如 400 / 700。"
+            },
+            "language_support": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "语言支持，如 latin / cjk。"
+            }
+          },
+          "description": "FONT 专用字段。"
+        },
+        "footage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "subject": {
+              "type": "string",
+              "description": "主题，如 city-street / office / nature。"
+            },
+            "location": {
+              "type": "string",
+              "description": "地点。"
+            },
+            "era": {
+              "type": "string",
+              "description": "年代特征，如 modern / 1990s / archive。"
+            },
+            "duration": {
+              "type": "number",
+              "minimum": 0,
+              "description": "时长（秒）。"
+            },
+            "resolution": {
+              "type": "string",
+              "description": "分辨率，如 1080p / 4k。"
+            },
+            "fps": {
+              "type": "number",
+              "description": "帧率。"
+            },
+            "authenticity": {
+              "type": "string",
+              "description": "真实性说明，如 real-footage / archival / ai-generated。"
+            }
+          },
+          "description": "FOOTAGE 专用字段。"
+        },
+        "image": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "subject": {
+              "type": "string",
+              "description": "主题。"
+            },
+            "orientation": {
+              "type": "string",
+              "enum": [
+                "LANDSCAPE",
+                "PORTRAIT",
+                "SQUARE",
+                "UNKNOWN"
+              ],
+              "description": "画面方向。"
+            }
+          },
+          "description": "IMAGE 专用字段。"
+        },
+        "reference": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "creator": {
+              "type": "string",
+              "description": "创作者/出处。"
+            },
+            "analysis_path": {
+              "type": "string",
+              "description": "本机参考分析报告路径（REFERENCE_ANALYSIS 产物）。"
+            },
+            "style_tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "风格标签。"
+            },
+            "motion_tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "运动标签。"
+            },
+            "editorial_tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "剪辑/叙事标签。"
+            },
+            "audio_tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "声音标签。"
+            },
+            "best_lessons": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "最佳可复用规则（供 Knowledge Adapter 吸收，§76-79 之外的语义标签）。"
+            }
+          },
+          "description": "REFERENCE 专用字段。"
+        }
+      },
+      "description": "类型特定元数据（§8 扩展槽）：按 type 取对应键（motion/shot_recipe/3d/texture/hdri/sfx/music/soundfont/font/footage/image/reference）；OTHER 类型可留空。所有字段 optional，数据缺失时省略而非伪造。"
+    },
+    "metadata_version": {
+      "type": "string",
+      "description": "元数据版本（如 \"1.0\"），add/update 时递增（§71），标识 schema 演进。"
+    },
+    "last_verified": {
+      "type": "string",
+      "format": "date-time",
+      "description": "最近验证时间（ISO 8601）。"
+    },
+    "added_by": {
+      "type": "string",
+      "description": "添加者（模块/工作流，如 P4-4 seed / user）。"
+    },
+    "added_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "添加时间（ISO 8601）。"
+    },
+    "discovery_source": {
+      "type": "string",
+      "description": "发现来源（reuse-map 条目名 / 官方文档 / provider 目录）。"
+    }
+  }
+}

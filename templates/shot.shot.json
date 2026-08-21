@@ -1,0 +1,98 @@
+{
+  "id": "S001",
+  "scene_id": "SC001",
+  "order": 1,
+  "duration": 3.0,
+  "start_time": 0.0,
+  "end_time": 3.0,
+  "narrative_purpose": "...",
+  "voiceover": "...",
+  "on_screen_text": "",
+  "visual_description": "...",
+  "camera": {
+    "movement": "static|push|pan|orbit",
+    "framing": "..."
+  },
+  "motion": {
+    "character": "...",
+    "intensity": "micro|narrative|hero"
+  },
+  "audio": {
+    "music": {
+      "mode": "continue|cue|silence",
+      "cue": "",
+      "action": ""
+    },
+    "sfx": ["..."],
+    "ambience": ["..."],
+    "sync_points": ["..."],
+    "voiceover": {
+      "present": false,
+      "ducking": "..."
+    },
+    "notes": ""
+  },
+  "transition_in": "cut|dissolve|...",
+  "transition_out": "...",
+  "layers": [
+    { "layer_id": "L001", "z_order": 1 }
+  ],
+  "route": "REMOTION|THREE_D|REAL_FOOTAGE|GENERATIVE_VIDEO|JY_NATIVE|HYBRID|UNDECIDED",
+  "continuity_group": "...",
+  "assets": [],
+  "dependencies": [],
+  "approval": {
+    "approval_id": "AP-002",
+    "status": "pending"
+  },
+  "implementation_status": "not_started",
+  "qa_status": "not_started",
+  "notes": "Layer Intent: ; Editability: HIGH/LOW (reason); Audio Intention: ",
+  "visual_direction": {
+    "intent": "...",
+    "editability": "HIGH|LOW",
+    "reason": "..."
+  },
+  "_fill_guide": {
+    "说明": "本文件是 templates/shot.shot.json（Phase-2 §57）——与 schemas/shot.schema.json 对齐的 JSON skeleton。使用前删除 _fill_guide 键；正式实例落地到 <project>/shots/S###.json。顶层 24 字段全部为 schema required（额外出现的 visual_direction 为 Phase-2 扩展，见下）。",
+    "id": "必填，string，格式 S###（正则 ^S\\d{3}$），全片唯一。",
+    "scene_id": "必填，string，格式 SC###，引用 scenes/SC###.json 的 id；必须与所属 Scene 的 scene.shots[].shot_id 互相一致。",
+    "order": "必填，integer，镜头在场景内顺序（与 scene.shots[].order 一致）。",
+    "duration": "必填，number（秒）。约束：duration = end_time - start_time；Scene.target_duration = Σ duration（±5%）。",
+    "start_time": "必填，number（秒），全片绝对开始时间（由 Scene 顺序 + 前序镜头累计推导）。",
+    "end_time": "必填，number（秒），start_time + duration。",
+    "narrative_purpose": "必填，string，本镜头在叙事上完成什么（对齐 STORY_BEAT_MAP 的 Beat）。",
+    "voiceover": "必填，string，旁白文案；无则空字符串。与 shot.audio.voiceover.present 保持一致。",
+    "on_screen_text": "必填，string，屏幕文字（标题/字幕/角标）；无则空字符串。",
+    "visual_description": "必填，string，视觉描述（构图/内容/关键帧要点），是后续实现与 QA 的依据。",
+    "camera.movement": "相机运动意向：static|push|pan|orbit|tilt|zoom|follow|...（写实际取值）。shot.schema.json 中 camera 允许 string 与对象两种写法（oneOf），本模板为对象写法；string 写法同样允许，如 'push in 20%, 中景'。",
+    "camera.framing": "景别/构图说明：如 '中景，居中留白 60%'。",
+    "motion.character": "动效语言描述：如 '卡片 stagger 消隐 / 标题 spring 入场'（对齐 VISUAL_BIBLE 的 Motion Character）。shot.schema.json 中 motion 允许 string 与对象两种写法（oneOf），本模板为对象写法；string 写法同样允许。",
+    "motion.intensity": "动效强度：micro|narrative|hero（Hero Effect 必须克制，全片占比 ≤20–30%，见 §64）。",
+    "audio.music.mode": "音乐模式：continue|cue|silence（continue=延续场景音乐，cue=此处触发提示点，silence=静音）。",
+    "audio.music.cue": "音乐 cue 引用/描述（mode=cue 时必填），如 '主题进入 @00:18'。",
+    "audio.music.action": "音乐动作：如 'duck -3dB' / 'fade out 1s' / 'riser 至 impact'。",
+    "audio.sfx": "array of string，音效清单（Level 1 Invisible / Level 2 Narrative / Level 3 Hero，见 AUDIO_DIRECTION）。",
+    "audio.ambience": "array of string，环境声清单（如 'room tone -20dB'）。",
+    "audio.sync_points": "array of string，音画同步点（如 '00:02 光标声与闪烁同拍'）；与 AUDIO_MAP 时间轴一致。",
+    "audio.voiceover.present": "boolean，本镜头是否有 VO（与 voiceover 字段非空保持一致）。",
+    "audio.voiceover.ducking": "string，VO 闪避策略：如 'music duck -3dB' / 'none'。",
+    "audio.notes": "string，音频备注（临时音频意图、依赖说明等）。",
+    "transition_in": "string，入场转场：cut|dissolve|wipe|fade_from_black|...（写实际取值）。",
+    "transition_out": "string，出场转场：cut|dissolve|fade_to_black|...。",
+    "layers": "array of {layer_id, z_order}，引用 layers/L###.json 的 id（正则 ^L\\d{3}$）；z_order 决定层序，与 layer.z_order 一致。单层 Shot 也要写（至少一层）。",
+    "route": "【§58 NO premature Route】string，枚举：REMOTION|THREE_D|REAL_FOOTAGE|GENERATIVE_VIDEO|JY_NATIVE|HYBRID|UNDECIDED。Storyboard 阶段一律填 UNDECIDED！最终 Routing 是 Phase 3 的事；技术意向只写进 notes（如 'Likely: REMOTION'）。",
+    "continuity_group": "string，Motion Continuity Group 名（连续 Motion 应一起 Render，禁止为可编辑性硬拆，v0.2 §31）；无则空字符串。",
+    "assets": "array of {asset_id, slot}，引用 assets/A###.json 的 asset_id；Phase-2 只填占位 Asset Requirement，不实际生产资产。",
+    "dependencies": "array of {type, target_id}，如 {'type': 'shot', 'target_id': 'S001'}；无则 []。",
+    "approval.approval_id": "必填，string，格式 AP-###，storyboard 镜头级审批（scope 可写 shot:S001）。",
+    "approval.status": "必填，枚举：pending|approved|rejected|revision_requested|superseded。",
+    "implementation_status": "必填，枚举：not_started|in_progress|blocked|completed|failed；分镜阶段 not_started。",
+    "qa_status": "必填，枚举：not_started|in_progress|passed|failed|blocked；分镜阶段 not_started。",
+    "notes": "必填，string。【Phase-2 三新字段的规范落点之一（与顶层 visual_direction 二选一或都写）】：按固定格式写 'Layer Intent: <五段摘要>; Editability: HIGH/LOW (reason); Audio Intention: <六项摘要>'，保证可机器解析、可搜索。",
+    "visual_direction.intent": "【Layer Intent §59 规范落点之二】string，五段式意向：Background / Main concept / Typography / Atmosphere / Audio 各一句（可简写为 'BG: …; CONCEPT: …; TYPO: …; ATMO: …; AUDIO: …'）。注意：shot.schema.json 顶层没有 visual_direction 字段，这是 Phase-2 扩展键（validator 不强制 additionalProperties，可放行）；若要严格对齐 schema，把内容并入 notes 即可。",
+    "visual_direction.editability": "【Editability Requirement §60】string，HIGH|LOW。HIGH=需要保留可编辑源（参数化/组件化）；LOW=允许 bake（如连续 Motion 整段渲染）。",
+    "visual_direction.reason": "【Editability Requirement §60】string，判定理由（必须写，覆盖率由 §64 检查）。",
+    "契约": "ID 全部 S###/SC###/L###/A###/AP-###；duration=end-start；scene.shots[].shot_id 与 shot.id 双向一致；route 在 Phase-2 恒为 UNDECIDED。"
+  }
+}

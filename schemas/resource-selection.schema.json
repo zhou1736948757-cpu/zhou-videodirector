@@ -1,0 +1,190 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/resource-selection.schema.json",
+  "title": "resource_selection",
+  "description": "资源选择：Registry 检索的输出契约（Phase-4 Prompt §83）。对每个 resource-request 产出一条 selection（含首选 + 备选 + 可解释理由 + 审批 + 获取状态）；经审批后回填 Asset 生产计划（asset_id 回链，§85-86）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "selected_resource",
+    "alternatives",
+    "selection_reason",
+    "approval",
+    "fetch_status"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "pattern": "^RR-\\d{3}$",
+      "description": "关联的 resource-request.id。"
+    },
+    "selected_resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_id",
+        "provider",
+        "why_matched",
+        "best_use",
+        "potential_problem",
+        "license",
+        "estimated_fetch_size",
+        "dependencies",
+        "reuse_recommendation"
+      ],
+      "properties": {
+        "resource_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+:[a-z0-9_-]+:[a-z0-9._-]+$",
+          "description": "选中的 resource.id（{provider}:{type}:{slug}）。"
+        },
+        "provider": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "对应 provider.id。"
+        },
+        "why_matched": {
+          "type": "string",
+          "description": "为何匹配（对应排序因子的可解释说明，§46）。"
+        },
+        "best_use": {
+          "type": "string",
+          "description": "最佳用法建议。"
+        },
+        "potential_problem": {
+          "type": "string",
+          "description": "潜在问题/风险（如 license 未知、体积大、兼容性存疑、需认证）。"
+        },
+        "license": {
+          "type": "string",
+          "description": "许可证摘要（license_type + 关键限制，如 \"CC-BY-4.0，需署名，可商用\"）。"
+        },
+        "estimated_fetch_size": {
+          "type": "string",
+          "description": "估算获取体积（如 \"3.2MB\" / \"≈200KB\" / \"未知\"）。"
+        },
+        "dependencies": {
+          "type": "string",
+          "description": "依赖摘要（npm/peer/兼容性要点）。"
+        },
+        "reuse_recommendation": {
+          "type": "string",
+          "enum": [
+            "USE_AS_IS",
+            "ADAPT",
+            "COMPOSE",
+            "BUILD_NEW"
+          ],
+          "description": "复用建议（§109-111）：USE_AS_IS=直接用；ADAPT=适配后使用；COMPOSE=组合多个资源；BUILD_NEW=自建（必须记录 why existing failed，见 selection_reason）。"
+        }
+      },
+      "description": "首选资源（§83）。"
+    },
+    "alternatives": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "resource_id",
+          "provider",
+          "why_not_chosen"
+        ],
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+:[a-z0-9_-]+:[a-z0-9._-]+$",
+            "description": "备选 resource.id。"
+          },
+          "provider": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "description": "对应 provider.id。"
+          },
+          "why_not_chosen": {
+            "type": "string",
+            "description": "未选原因（可解释性，§46）。"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "综合得分（可选，0-1）。"
+          }
+        }
+      },
+      "description": "备选资源（候选多样化：覆盖不同 provider/type，避免全来自同一 provider，§105-106）。"
+    },
+    "selection_reason": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "选择理由汇总（可审计，≤500 字符；禁止保存私有 Chain-of-Thought）。reuse_recommendation=BUILD_NEW 时必须说明 why existing failed。"
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "required",
+        "reason"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved",
+            "rejected"
+          ],
+          "description": "审批状态（§52-56 Approval Gate）。"
+        },
+        "required": {
+          "type": "boolean",
+          "description": "是否需要审批（LARGE / EXTERNAL_INSTALL 获取必为 true）。"
+        },
+        "reason": {
+          "type": "string",
+          "description": "审批理由/要求说明（Explain → Size → Why → Alternatives 摘要）。"
+        }
+      },
+      "description": "获取审批。"
+    },
+    "fetch_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "NOT_CACHED",
+            "METADATA_CACHED",
+            "PREVIEW_CACHED",
+            "PAYLOAD_CACHED",
+            "INSTALLED"
+          ],
+          "description": "缓存/获取状态（5 枚举，§57-58）。"
+        },
+        "local_path": {
+          "type": "string",
+          "description": "本地缓存路径。"
+        },
+        "downloaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "下载时间（ISO 8601）。"
+        }
+      },
+      "description": "获取状态（§83）。"
+    },
+    "asset_id": {
+      "type": "string",
+      "pattern": "^A\\d{3}$",
+      "description": "回链到项目 Asset（§85-86，可选）：生产落地后指向 asset.schema.json 的 asset_id（A###）；asset 内写 registry_resource_id 指回本资源的 resource_id。"
+    }
+  }
+}

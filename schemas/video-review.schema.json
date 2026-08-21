@@ -1,0 +1,694 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/video-review.schema.json",
+  "title": "video_review",
+  "description": "生成视频评审：GENERATIVE_VIDEO_REVIEW 的数据契约（Phase-6 Prompt §35-39）。AI Video 生成后不能“第一条直接用”，必须评审：18 个维度各打分 0-10 并附证据（§36），13 类 AI 伪影检测（§37），汇总 verdict（PASS / PASS_WITH_ISSUES / REGENERATE / REJECT，§38 附 score 0-100）。失败时先 regeneration_diagnosis 定位（§39）再针对性修改，禁止直接全量重写 Prompt。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "review_id",
+    "asset_ref",
+    "request_ref",
+    "verdict",
+    "score",
+    "dimensions",
+    "artifacts",
+    "summary",
+    "reviewed_at"
+  ],
+  "properties": {
+    "review_id": {
+      "type": "string",
+      "pattern": "^RV-\\d{3}$",
+      "description": "评审 ID，格式 RV-###（Phase 6 ID 总表见 work/p6-01/SCHEMA_CONTRACT.md）；asset.review_ref 回链。"
+    },
+    "asset_ref": {
+      "type": "string",
+      "pattern": "^(A\\d{3}|S\\d{3})$",
+      "description": "被评审候选资产（A### 对应一次生成的候选变体；候选评审时可能尚无 asset_id，允许引用 shot_id S###；FR-019）。"
+    },
+    "request_ref": {
+      "type": "string",
+      "description": "回链请求/生产包（EV-### / GV-### / FR-###，注明评审对应哪条生产请求）。"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "PASS_WITH_ISSUES",
+        "REGENERATE",
+        "REJECT"
+      ],
+      "description": "评审结论（4 枚举，§38）：PASS=通过；PASS_WITH_ISSUES=有可接受问题通过；REGENERATE=需再生成（按诊断定向修改 §39）；REJECT=拒绝（不建议重试）。"
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "综合评分（0-100，§38 建议 verdict 附数值）。"
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prompt_adherence": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "composition": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "subject_consistency": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "motion_quality": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "camera_quality": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "temporal_coherence": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "anatomy": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "physics": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "lighting": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "continuity": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "visual_bible_fit": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "text_artifacts": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "unwanted_logos": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "flicker": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "warping": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "usability_for_overlays": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "editability": {
+          "$ref": "#/definitions/dimension_entry"
+        },
+        "overall_production_value": {
+          "$ref": "#/definitions/dimension_entry"
+        }
+      },
+      "description": "评审维度（18 项，§36）：prompt_adherence=提示词贴合；composition=构图；subject_consistency=主体一致；motion_quality=运动质量；camera_quality=相机质量；temporal_coherence=时间一致性；anatomy=解剖；physics=物理；lighting=灯光；continuity=连续性；visual_bible_fit=Visual Bible 契合；text_artifacts=文字伪影；unwanted_logos=多余 Logo；flicker=闪烁；warping=扭曲；usability_for_overlays=叠加可用性；editability=可编辑性；overall_production_value=整体制作价值。"
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "face_deformation": {
+          "$ref": "#/definitions/artifact_entry"
+        },
+        "hand_deformation": {
+          "$ref": "#/definitions/artifact_entry"
+        },
+        "object_morphing": {
+          "$ref": "#/definitions/artifact_entry"
+        },
+        "background_instability": {
+          "$ref": "#/definitions/artifact_entry"
+        },
+        "texture_crawling": {
+          "$ref": "#/definitions/artifact_entry"
+        },
+        "flicker": {
+          "$ref": "#/definitions/artifact_entry"
+        },
+        "camera_jump": {
+          "$ref": "#/definitions/artifact_entry"
+        },
+        "identity_drift": {
+          "$ref": "#/definitions/artifact_entry"
+        },
+        "lighting_inconsistency": {
+          "$ref": "#/definitions/artifact_entry"
+        },
+        "impossible_geometry": {
+          "$ref": "#/definitions/artifact_entry"
+        },
+        "text_garbage": {
+          "$ref": "#/definitions/artifact_entry"
+        },
+        "logo_garbage": {
+          "$ref": "#/definitions/artifact_entry"
+        },
+        "temporal_melting": {
+          "$ref": "#/definitions/artifact_entry"
+        }
+      },
+      "description": "AI 伪影检测（13 项，§37）：face_deformation=面部变形；hand_deformation=手部变形；object_morphing=物体形变；background_instability=背景不稳；texture_crawling=纹理爬行；flicker=闪烁；camera_jump=镜头跳变；identity_drift=身份漂移；lighting_inconsistency=灯光不一致；impossible_geometry=不可能几何；text_garbage=文字乱码；logo_garbage=Logo 乱码；temporal_melting=时间溶解。任一关键伪影 detected=true 不得标记 APPROVED（Test 8）。"
+    },
+    "regeneration_diagnosis": {
+      "type": "string",
+      "enum": [
+        "composition",
+        "motion",
+        "identity",
+        "camera",
+        "physics",
+        "prompt_overload"
+      ],
+      "description": "再生成诊断（可选，§39 6 枚举）：verdict=REGENERATE 时应定位单一根因——composition=构图问题；motion=运动问题；identity=身份问题；camera=相机问题；physics=物理问题；prompt_overload=提示词过载（§40 建议简化/split/reduce，而不是无限追加 Prompt）。"
+    },
+    "revision_suggestions": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string"
+      },
+      "description": "定向修改建议（可选，针对 diagnosis 给出具体修改点）。"
+    },
+    "failure_attempt": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "失败尝试序号（可选，§117 Failure Recovery：attempt 1 prompt refinement → attempt 2 reduce complexity → attempt 3 alternative strategy；仍失败 BLOCKED）。"
+    },
+    "editorial_usability": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "serves_narration": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "evidence"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "ok",
+                "fail",
+                "NEEDS_EVIDENCE",
+                "not_applicable"
+              ],
+              "description": "编辑可用性状态（对齐 review.py editorial_usability 实际输出，R4）：ok=通过；fail=未通过；NEEDS_EVIDENCE=缺证据需补充；not_applicable=无对应要求不适用。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（可选，缺省省略）。"
+            },
+            "evidence": {
+              "type": "array",
+              "minItems": 0,
+              "items": {
+                "$ref": "#/definitions/evidence_entry"
+              },
+              "description": "证据条目数组（对齐 review.py 实际输出的 {source, note} 结构，R4）。"
+            }
+          },
+          "description": "是否真正服务旁白/叙事（§102）：{status, note, evidence}。"
+        },
+        "usable_duration_match": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "evidence"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "ok",
+                "fail",
+                "NEEDS_EVIDENCE",
+                "not_applicable"
+              ],
+              "description": "编辑可用性状态（对齐 review.py editorial_usability 实际输出，R4）：ok=通过；fail=未通过；NEEDS_EVIDENCE=缺证据需补充；not_applicable=无对应要求不适用。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（可选，缺省省略）。"
+            },
+            "evidence": {
+              "type": "array",
+              "minItems": 0,
+              "items": {
+                "$ref": "#/definitions/evidence_entry"
+              },
+              "description": "证据条目数组（对齐 review.py 实际输出的 {source, note} 结构，R4）。"
+            }
+          },
+          "description": "可用时长是否匹配需求（§102；字段名对齐 review.py，FR-023）：{status, note, evidence}。"
+        },
+        "clean_entry_exit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "evidence"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "ok",
+                "fail",
+                "NEEDS_EVIDENCE",
+                "not_applicable"
+              ],
+              "description": "编辑可用性状态（对齐 review.py editorial_usability 实际输出，R4）：ok=通过；fail=未通过；NEEDS_EVIDENCE=缺证据需补充；not_applicable=无对应要求不适用。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（可选，缺省省略）。"
+            },
+            "evidence": {
+              "type": "array",
+              "minItems": 0,
+              "items": {
+                "$ref": "#/definitions/evidence_entry"
+              },
+              "description": "证据条目数组（对齐 review.py 实际输出的 {source, note} 结构，R4）。"
+            }
+          },
+          "description": "是否有干净入/出点（§102）：{status, note, evidence}。"
+        },
+        "overlay_space_sufficient": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "evidence"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "ok",
+                "fail",
+                "NEEDS_EVIDENCE",
+                "not_applicable"
+              ],
+              "description": "编辑可用性状态（对齐 review.py editorial_usability 实际输出，R4）：ok=通过；fail=未通过；NEEDS_EVIDENCE=缺证据需补充；not_applicable=无对应要求不适用。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（可选，缺省省略）。"
+            },
+            "evidence": {
+              "type": "array",
+              "minItems": 0,
+              "items": {
+                "$ref": "#/definitions/evidence_entry"
+              },
+              "description": "证据条目数组（对齐 review.py 实际输出的 {source, note} 结构，R4）。"
+            }
+          },
+          "description": "叠加空间是否足够（text_safe_area / overlay_safe_area 满足度，§102）：{status, note, evidence}。"
+        },
+        "adjacent_camera_direction": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "evidence"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "ok",
+                "fail",
+                "NEEDS_EVIDENCE",
+                "not_applicable"
+              ],
+              "description": "编辑可用性状态（对齐 review.py editorial_usability 实际输出，R4）：ok=通过；fail=未通过；NEEDS_EVIDENCE=缺证据需补充；not_applicable=无对应要求不适用。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（可选，缺省省略）。"
+            },
+            "evidence": {
+              "type": "array",
+              "minItems": 0,
+              "items": {
+                "$ref": "#/definitions/evidence_entry"
+              },
+              "description": "证据条目数组（对齐 review.py 实际输出的 {source, note} 结构，R4）。"
+            }
+          },
+          "description": "相机方向是否与相邻镜头兼容（§23 银幕方向；字段名对齐 review.py，FR-023）：{status, note, evidence}。"
+        }
+      },
+      "description": "编辑可用性（可选，§102 五项）：每项 {status, note, evidence}（status=ok/fail/NEEDS_EVIDENCE/not_applicable；evidence 为 {source, note} 对象数组；对齐 review.py 实际输出与键名，FR-022/FR-023/R4）。"
+    },
+    "summary": {
+      "type": "string",
+      "description": "评审总结（结论要点）。"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "description": "评审时间（ISO 8601）。"
+    },
+    "variant_id": {
+      "type": "string",
+      "description": "被评审候选的变体 ID（可选，如 variant-01，§92；对齐 review.py review_candidate 输出，FR-021）。"
+    },
+    "machine_checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "probe": {
+          "type": "object",
+          "description": "ffprobe 探测结果（§100）。"
+        },
+        "sampled_frames": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "抽帧数（§100）。"
+        },
+        "sample_interval_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "采样间隔（秒），探针/抽帧失败时为 null（§100）。"
+        },
+        "flicker": {
+          "$ref": "#/definitions/machine_detected_entry"
+        },
+        "freeze": {
+          "$ref": "#/definitions/machine_detected_entry"
+        },
+        "black_frames": {
+          "$ref": "#/definitions/machine_detected_entry"
+        },
+        "temporal_coherence": {
+          "$ref": "#/definitions/machine_score_entry"
+        },
+        "composition": {
+          "$ref": "#/definitions/machine_composition_entry"
+        },
+        "text_artifacts_hint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "hint",
+            "note"
+          ],
+          "properties": {
+            "hint": {
+              "type": "boolean",
+              "description": "高对比细节区域启发式提示（不作检出，需 evidence 确认）。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明。"
+            }
+          },
+          "description": "文字伪影复杂度提示（仅 hint，不作检出，§37/§100）。"
+        },
+        "warnings": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "string"
+          },
+          "description": "机器检测警告清单（§100）。"
+        },
+        "error": {
+          "type": "string",
+          "description": "探针/抽帧失败原因（仅失败路径存在，§100）。"
+        }
+      },
+      "description": "技术/信号级机器检测（可选，§100；键名以 review.py machine_checks 实际输出为准，FR-021）：probe/sampled_frames/sample_interval_s/flicker/freeze/black_frames/temporal_coherence/composition(overlay 静区)/text_artifacts_hint/warnings/error。"
+    },
+    "issues": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "#/definitions/issue_entry"
+      },
+      "description": "评审问题清单（可选，对齐 review.py _collect_issues 实际输出，R4）：每项 {type, name, note} 或 {type, name, score}（low_score 项带 score）。type=hard_artifact|machine|needs_evidence|low_score。"
+    }
+  },
+  "definitions": {
+    "evidence_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "note"
+      ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "证据来源（machine/human/vision_model/packet_diff/adjacent_data/UNKNOWN，对齐 review.py EVIDENCE_SOURCES）。"
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "证据说明（调用方未提供时引擎输出 null，R4 放行）。"
+        }
+      },
+      "description": "证据条目（对齐 review.py 实际输出，R4）：{source, note}。"
+    },
+    "issue_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "hard_artifact",
+            "machine",
+            "needs_evidence",
+            "low_score"
+          ],
+          "description": "问题类别（对齐 review.py _collect_issues 实际输出，R4）：hard_artifact=硬伪影；machine=机器实测检出；needs_evidence=缺证据维度；low_score=低分维度。"
+        },
+        "name": {
+          "type": "string",
+          "description": "涉及的维度/伪影/机器检查项名。"
+        },
+        "note": {
+          "type": "string",
+          "description": "说明（hard_artifact/machine/needs_evidence 项携带）。"
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "低分项得分（low_score 项携带，替代 note，对齐 review.py 实际输出，R4）。"
+        }
+      },
+      "description": "评审问题条目（对齐 review.py _collect_issues 实际输出，R4）：{type, name, note} 或 {type, name, score}。"
+    },
+    "dimension_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score",
+        "evidence"
+      ],
+      "properties": {
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "维度评分（0-10）。"
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "$ref": "#/definitions/evidence_entry"
+          },
+          "description": "证据条目数组（对齐 review.py 实际输出的 {source, note} 结构，可追溯：帧号/观察/检测结论，铁律 evidence 可追溯；FR-020/R4）。"
+        }
+      }
+    },
+    "artifact_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "detected",
+        "evidence"
+      ],
+      "properties": {
+        "detected": {
+          "type": "boolean",
+          "description": "是否检出该伪影。"
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "$ref": "#/definitions/evidence_entry"
+          },
+          "description": "证据条目数组（对齐 review.py 实际输出的 {source, note} 结构：帧号/位置/描述；FR-020/R4）。"
+        }
+      }
+    },
+    "machine_detected_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "detected",
+        "score",
+        "metric",
+        "evidence"
+      ],
+      "properties": {
+        "detected": {
+          "type": "boolean",
+          "description": "是否检出该信号异常（§100）。"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "机器分（0-10）。"
+        },
+        "metric": {
+          "type": "object",
+          "description": "实测指标（如峰谷差/振荡比/连续同帧数等，§100）。"
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "source",
+              "note"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "证据来源（machine/human/vision_model/packet_diff/adjacent_data/UNKNOWN）。"
+              },
+              "note": {
+                "type": "string",
+                "description": "证据说明。"
+              }
+            }
+          },
+          "description": "证据条目数组（对齐 review.py machine_checks 的 {source, note} 结构）。"
+        }
+      },
+      "description": "机器检测检出项（flicker/freeze/black_frames 共用结构，对齐 review.py machine_checks 实际输出）。"
+    },
+    "machine_score_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score",
+        "metric",
+        "evidence"
+      ],
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "机器分（0-10）。"
+        },
+        "metric": {
+          "type": "object",
+          "description": "实测指标（相邻抽帧差值均值/方差等，§100）。"
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "source",
+              "note"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "证据来源。"
+              },
+              "note": {
+                "type": "string",
+                "description": "证据说明。"
+              }
+            }
+          },
+          "description": "证据条目数组（对齐 review.py machine_checks 的 {source, note} 结构）。"
+        }
+      },
+      "description": "机器检测计分项（temporal_coherence 结构，无 detected 键，对齐 review.py 实际输出）。"
+    },
+    "machine_composition_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "overlay_quiet",
+        "score",
+        "metric",
+        "evidence"
+      ],
+      "properties": {
+        "overlay_quiet": {
+          "type": "boolean",
+          "description": "overlay 静区是否安静（§13/§14）。"
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "机器分（0-10）。"
+        },
+        "metric": {
+          "type": "object",
+          "description": "实测指标（区域亮度/复杂度等，§100）。"
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "source",
+              "note"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "证据来源。"
+              },
+              "note": {
+                "type": "string",
+                "description": "证据说明。"
+              }
+            }
+          },
+          "description": "证据条目数组（对齐 review.py machine_checks 的 {source, note} 结构）。"
+        }
+      },
+      "description": "机器检测构图项（composition 结构，含 overlay_quiet 键，对齐 review.py 实际输出）。"
+    }
+  }
+}

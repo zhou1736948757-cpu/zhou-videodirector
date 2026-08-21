@@ -1,0 +1,34 @@
+# manual-web.yaml — 通用人工网页生成通道（§29 一等公民）
+# provider_id: manual-web
+# api_available: false + manual_generation_supported: true —— 不接任何具体服务，
+# 只描述"用户自行在网页端生成并返回文件"这一通道的通用参数范围。
+# 参数范围取常见通用值，不代表任何具体厂商；不涉及任何 API / 凭据 / 费用。
+
+provider_id: manual-web
+name: Manual Web Generation (Generic)
+model: UNKNOWN
+text_to_video: true
+image_to_video: true
+first_last_frame: false
+reference_image: true
+character_reference: false
+camera_control: partial
+duration_options:
+  - {min: 3, max: 15}
+resolution_options:
+  - "1280x720"
+  - "1920x1080"
+  - "3840x2160"
+aspect_ratios:
+  - "16:9"
+  - "9:16"
+  - "1:1"
+audio_generation: false
+seed_control: false
+commercial_terms: "用户自行在网页端确认服务方授权与费用；本档案不产生任何 API 调用。"
+api_available: false
+manual_generation_supported: true
+negative_prompt_supported: true
+max_prompt_length: 2000
+notes: "通用人工生成通道：ZHOU 导出 prompt/instructions，用户在网页端生成并把文件放回，交给 P6-04 ingest（§29）。"
+status: active

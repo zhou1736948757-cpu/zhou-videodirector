@@ -1,0 +1,41 @@
+# routing/S###.yaml — Shot 路由模板（Phase-3 §53）
+# 用途：每个 Shot 一条路由决策记录，落盘 <project>/routing/S###.yaml。
+# 生成引擎：modules/router/router.py（route_single / to_routing_yaml）。
+# 共享契约：Route 6 枚举 | 12 项因子（0-1） | route_source 4 值 | confidence 3 档 | prototype 6 型。
+# 禁止：保存私有 Chain-of-Thought，只保留 decision_summary（≤300 字符，§38）。
+# 说明：正式输出前删除全部 # 注释行。
+
+shot_id: S018                              # Shot ID，引用 shot.id（S###）
+route: HYBRID                              # 选定 Route（6 枚举）：REMOTION | THREE_D | REAL_FOOTAGE | GENERATIVE_VIDEO | JY_NATIVE | HYBRID
+confidence: 0.87                           # 置信度（0-1）：>=0.80 HIGH 直荐 / 0.55-0.79 MEDIUM 需原型 / <0.55 LOW 进入 Concept Exploration
+route_source: AUTO                         # 决策来源（4 枚举）：AUTO | USER_OVERRIDE | DIRECTOR_OVERRIDE | PROTOTYPE_RESULT
+reason:
+  production: >-                           # 生产侧理由：为什么该 Route 在生产上成立（成本 / 复杂度 / 生成可行性）
+    高熵真实街景无法程序化重建，但招牌文字必须精确；拆层后各 Producer 独立生产、互不阻塞。
+  accuracy: >-                             # 精确性理由：文字 / 数据 / 时序的准确性约束
+    招牌文字必须精确可读，GENERATIVE_VIDEO 不得独占文字层（硬约束，见 modules/router/router.py hard_constraints）。
+  editability: >-                          # 可编辑性理由：用户之后是否需要手动修改该内容
+    字幕与标题需保持时间线可编辑（KEEP_EDITABLE）；AI 背景层整体可替换（ASSET_REPLACEABLE）。
+decision_summary: >-                       # 可审计决策摘要（≤300 字符），禁止私有 CoT（§38）
+  S018 是典型 HYBRID：真实街道黄昏背景（GENERATIVE_VIDEO）+ 精确招牌文字
+  （REMOTION 层）+ 字幕（KEEP_EDITABLE），剪映时间线组装。
+scores:
+  structural_precision: 0.75               # 结构精度需求（0-1）：HIGH 倾向 REMOTION / THREE_D（UI / Graph / Chart / Layout）
+  photorealism: 0.85                       # 照片真实感需求（0-1）：HIGH 倾向 REAL_FOOTAGE / GENERATIVE_VIDEO
+  organic_motion: 0.80                     # 自然运动复杂度（0-1）：HIGH 倾向 REAL_FOOTAGE / GENERATIVE_VIDEO（hair / cloth / water / crowd）
+  scene_entropy: 0.85                      # 画面复杂度（0-1）：HIGH 倾向 REAL_FOOTAGE / GENERATIVE_VIDEO；LOW 倾向 REMOTION / THREE_D
+  text_accuracy: 0.90                      # 文字准确性需求（0-1）：HIGH 倾向 REMOTION / JY_NATIVE / HYBRID（生成式不独占）
+  data_accuracy: 0.20                      # 数据准确性需求（0-1）：HIGH 倾向 REMOTION / THREE_D（chart / statistics / map）
+  revision_requirement: 0.70               # 内容被修改的可能性（0-1）：HIGH 倾向 REMOTION / JY_NATIVE（不 Bake 进 AI Video）
+  timing_precision: 0.60                   # 帧级 / beat 级时间对齐需求（0-1）：HIGH 倾向 REMOTION / JY_NATIVE
+  atmosphere_requirement: 0.75             # 氛围 / 情绪价值（0-1）：HIGH 倾向 GENERATIVE_VIDEO / REAL_FOOTAGE
+  physical_complexity: 0.30                # 物理现象复杂度（0-1）：HIGH 判断 THREE_D 是否合理；不合理则 AI / Footage
+  camera_complexity: 0.55                  # 运镜复杂度（0-1）：简单→REMOTION / THREE_D；复杂实景运镜→AI / Footage
+  editability_requirement: 0.70            # 用户之后手动修改该内容的可能性（0-1）：HIGH 倾向 JY_NATIVE 或保留独立 Asset
+layer_decomposition_required: true         # 是否需要 Layer 拆分：HYBRID 强制 true（§54）；非 HYBRID 一般 false
+prototype_required: false                  # 是否需要原型验证：confidence < 0.80 时为 true（§40-43）
+prototype_type: null                       # 原型类型（6 枚举）：STATIC_KEYFRAME | REMOTION_MICRO_PROTOTYPE | THREE_D_PREVIS | AI_IMAGE_CONCEPT | AI_VIDEO_TEST | JY_TIMELINE_TEST
+prototype_goal: null                       # 原型验证目标：要验证的假设与通过标准（prototype_required=true 时必填）
+continuity_group: null                     # 所属 Motion Continuity Group（引用 shot.continuity_group；无则 null，§31）
+assembly_backend: JIANYING                 # 组装后端（2 枚举）：JIANYING（长视频优先）| REMOTION（复杂连续 Motion）（§55）
+supersedes: null                           # 被本次决策替代的旧 route 记录引用；旧记录不删除，保留历史（§73）

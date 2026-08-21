@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/subtitle.schema.json",
+  "title": "subtitle",
+  "description": "字幕条目：SUBTITLE TRACK 的结构化字幕（Phase-7 Prompt §53-57）。editable 默认 true（§55 字幕必须 KEEP_EDITABLE，除非用户明确要求复杂 Motion Graphic）；输入优先来自 approved transcript / voiceover script / subtitle source（§53），本阶段不重写 ASR。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "subtitle_id",
+    "text",
+    "start_frame",
+    "end_frame"
+  ],
+  "properties": {
+    "subtitle_id": {
+      "type": "string",
+      "description": "字幕 ID（Phase-7 ID 总表：spec 的 id_patterns 未定义 subtitle 前缀，故不设 pattern，字符串即可；如需统一格式由契约层修订）。"
+    },
+    "text": {
+      "type": "string",
+      "description": "字幕文本（§54）。"
+    },
+    "start_frame": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "起始帧（§54，帧安全计时）。"
+    },
+    "end_frame": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "结束帧（§54）。"
+    },
+    "speaker": {
+      "type": "string",
+      "description": "说话人（可选，§54）。"
+    },
+    "style_id": {
+      "type": "string",
+      "description": "字幕样式引用（可选，§54/§56 读取 VISUAL_BIBLE 决定 font/size/position/shadow 等）。"
+    },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "number",
+          "description": "归一化横坐标（0-1，可选）。"
+        },
+        "y": {
+          "type": "number",
+          "description": "归一化纵坐标（0-1，可选）。"
+        }
+      },
+      "description": "位置（可选，§54/§56）。"
+    },
+    "line_break": {
+      "type": "string",
+      "description": "换行规则（可选，§54，如 auto / manual / max_chars:20）。"
+    },
+    "emphasis": {
+      "type": "string",
+      "description": "强调方式（可选，§54，如 none / bold / highlight；复杂叙事强调文字属于 REMOTION / JY_NATIVE 区分，§57）。"
+    },
+    "editable": {
+      "type": "boolean",
+      "description": "是否可编辑（可选，默认 true，§55 字幕必须 KEEP_EDITABLE）。"
+    }
+  }
+}

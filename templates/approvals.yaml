@@ -1,0 +1,171 @@
+# approvals.yaml — 模板
+# 用途：机器可读的 Approval Current State（Phase-1 §20）。
+# 这是审批的「当前真相」：只反映当前状态。历史审批不删除、不覆盖；被替代的审批在 supersedes 中引用。
+# 状态枚举：not_started | pending | approved | rejected | revision_requested | superseded
+# Approval ID：AP-NNN，全局递增，永不复用。
+# 本模板给出完整示例结构：project（11 个 requires_approval 阶段）+ scenes + shots + assets 三级。
+# 新项目初始化时复制为项目根目录 approvals.yaml，全部置 not_started（见 project-template/approvals.yaml）。
+
+# --- project：11 个 requires_approval 阶段（Phase-1 §11 / schemas/state-machine.json）---
+# 每个阶段一个 key，字段含义：
+#   status        审批状态（not_started / pending / approved / rejected / revision_requested / superseded）
+#   approval_id   最近一次审批的 AP-NNN；未审批为 null
+#   decision      用户决定摘要（含 summary 子字段）；未审批为 null
+#   user_feedback 用户反馈列表（逐条原文）；未审批为 []
+#   created_at    审批发生时间（ISO8601）；未审批为 null
+#   supersedes    被本审批替代的旧 approval_id 列表
+project:
+  project_brief:
+    status: approved
+    approval_id: AP-001
+    decision:
+      summary: "Brief approved. 90s product intro, BOTH delivery."
+    user_feedback:
+      - "时长压到 90 秒"
+      - "强调 AI 记忆能力"
+    created_at: "2026-08-13T10:00:00+08:00"
+    supersedes: []
+  reference_analysis:
+    status: approved
+    approval_id: AP-002
+    decision:
+      summary: "Use Reference A pacing and Minimal Spatial Tech visual cues."
+    user_feedback: []
+    created_at: "2026-08-13T11:00:00+08:00"
+    supersedes: []
+  creative_direction:
+    status: pending
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  visual_bible:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  audio_direction:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  story_structure:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  storyboard:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  production_plan:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  timeline_plan:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  final_qa:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+
+# --- scenes：按 Scene ID（SC###）记录该 Scene 的审批状态 ---
+# 尚无 Scene 时为空字典：scenes: {}
+scenes:
+  SC001:
+    status: approved
+    approval_id: AP-004
+    decision:
+      summary: "SC001 direction approved; reduce memory card speed."
+    user_feedback:
+      - "卡片动画慢一点"
+    created_at: "2026-08-15T14:30:00+08:00"
+    supersedes: []
+
+# --- shots：按 Shot ID（S###）记录该 Shot 的审批状态 ---
+# 尚无 Shot 时为空字典：shots: {}
+shots:
+  S001:
+    status: pending
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+
+# --- assets：按 Asset ID（A###）记录该 Asset 的审批状态 ---
+# 尚无 Asset 时为空字典：assets: {}
+assets:
+  A001:
+    status: approved
+    approval_id: AP-007
+    decision:
+      summary: "Transparent overlay approved for reuse."
+    user_feedback: []
+    created_at: "2026-08-16T09:00:00+08:00"
+    supersedes: []
+
+# --- approvals：全部审批历史记录（AP-### 明细，永久保留，不可删除）---
+# 每条记录与 approval.schema.json 形状一致：approval_id / scope /
+# target{type,id} / status / decision{summary} / user_feedback / created_at /
+# supersedes。project/scenes/shots/assets 索引区只引用最新 approval_id；
+# 历史记录全部留在这里。新项目初始化时置空：approvals: []；
+# gates.py append_approval 会向本列表追加（append-only，不覆盖既有记录）。
+approvals:
+  - approval_id: AP-001
+    scope: project_brief
+    target:
+      type: project
+      id: project
+    status: approved
+    decision:
+      summary: "Brief approved. 90s product intro, BOTH delivery."
+    user_feedback:
+      - "时长压到 90 秒"
+      - "强调 AI 记忆能力"
+    created_at: "2026-08-13T10:00:00+08:00"
+    supersedes: []
+  - approval_id: AP-004
+    scope: scenes
+    target:
+      type: scene
+      id: SC001
+    status: approved
+    decision:
+      summary: "SC001 direction approved; reduce memory card speed."
+    user_feedback:
+      - "卡片动画慢一点"
+    created_at: "2026-08-15T14:30:00+08:00"
+    supersedes: []
+  - approval_id: AP-007
+    scope: assets
+    target:
+      type: asset
+      id: A001
+    status: approved
+    decision:
+      summary: "Transparent overlay approved for reuse."
+    user_feedback: []
+    created_at: "2026-08-16T09:00:00+08:00"
+    supersedes: []

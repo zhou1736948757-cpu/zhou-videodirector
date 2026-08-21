@@ -1,0 +1,260 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/footage-request.schema.json",
+  "title": "footage_request",
+  "description": "真实素材请求：Real Footage Pipeline 的输入契约（Phase-6 Prompt §54）。由已批准 Shot / Layer + EV 请求派生（§3），描述所需真实素材的主体/地点/时代/事件/画幅/许可与真实性要求；搜索走 Phase 4 Resource Registry / Footage Provider 接口（§59，不另造搜索系统），License 是硬门槛（§62），搜索预算受 §119 约束。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "shot_id",
+    "layer_id",
+    "purpose",
+    "subject",
+    "duration_needed",
+    "minimum_resolution",
+    "minimum_fps",
+    "license_requirement",
+    "status"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "pattern": "^FR-\\d{3}$",
+      "description": "素材请求 ID，格式 FR-###（Phase 6 ID 总表见 work/p6-01/SCHEMA_CONTRACT.md）。"
+    },
+    "shot_id": {
+      "type": "string",
+      "description": "关联 Shot ID（已批准 Storyboard，§3）。"
+    },
+    "layer_id": {
+      "type": "string",
+      "description": "关联 Layer ID（如 S###-L##）。"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "用途：该素材在叙事/画面中的职责（§10 先答为什么需要这段素材）。"
+    },
+    "subject": {
+      "type": "string",
+      "description": "主体：需要的画面内容（人物/地点/事件/物体）。"
+    },
+    "location": {
+      "type": "string",
+      "description": "地点（可选）。"
+    },
+    "time_period": {
+      "type": "string",
+      "description": "时间范围（可选，如 1980s / 二战时期）。"
+    },
+    "era": {
+      "type": "string",
+      "description": "时代（可选）。"
+    },
+    "event": {
+      "type": "string",
+      "description": "事件（可选，§57 具体历史事件须避免张冠李戴）。"
+    },
+    "action": {
+      "type": "string",
+      "description": "动作（可选，画面中发生的行为）。"
+    },
+    "shot_type": {
+      "type": "string",
+      "description": "景别/镜头类型（可选，如 establishing / close-up / b-roll）。"
+    },
+    "camera": {
+      "type": "string",
+      "description": "相机/运镜要求（可选）。"
+    },
+    "duration_needed": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "所需可用时长（秒）；素材可长于需求，后续通过 recommended in/out 选取可用区间（§71）。"
+    },
+    "minimum_resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "w",
+        "h"
+      ],
+      "properties": {
+        "w": {
+          "type": "integer",
+          "description": "最小宽度（像素）。"
+        },
+        "h": {
+          "type": "integer",
+          "description": "最小高度（像素）。"
+        }
+      },
+      "description": "最低分辨率（像素）。"
+    },
+    "minimum_fps": {
+      "type": "number",
+      "description": "最低帧率。"
+    },
+    "orientation": {
+      "type": "string",
+      "description": "方向要求（可选，如 横/竖/方）。"
+    },
+    "style": {
+      "type": "string",
+      "description": "风格匹配（可选，引用 VISUAL_BIBLE 风格；真实但不匹配会降排名 §74）。"
+    },
+    "authenticity_requirement": {
+      "type": "string",
+      "enum": [
+        "STRICT",
+        "PREFERRED",
+        "NOT_REQUIRED"
+      ],
+      "description": "真实性要求（可选，§56 3 枚举）：历史事件=STRICT；一般城市氛围=PREFERRED；抽象 B-roll=NOT_REQUIRED。"
+    },
+    "license_requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commercial_use",
+        "attribution_allowed",
+        "derivatives_allowed",
+        "redistribution_allowed"
+      ],
+      "properties": {
+        "commercial_use": {
+          "type": "boolean",
+          "description": "是否允许商用（§62 License 硬门槛；未知不得猜测，须标 LICENSE_REVIEW_REQUIRED §63）。"
+        },
+        "attribution_allowed": {
+          "type": "boolean",
+          "description": "是否允许署名。"
+        },
+        "derivatives_allowed": {
+          "type": "boolean",
+          "description": "是否允许衍生。"
+        },
+        "redistribution_allowed": {
+          "type": "boolean",
+          "description": "是否允许再分发。"
+        }
+      },
+      "description": "许可要求（§62 四项硬门槛，沿用 Phase 4 license 判定语义）。"
+    },
+    "source_preferences": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string"
+      },
+      "description": "来源偏好（可选）：如 user-owned / public-domain / institutional-archive / stock（§55 来源优先级随项目动态决定）。"
+    },
+    "avoid": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string"
+      },
+      "description": "回避清单（可选）：不得出现的内容/来源。"
+    },
+    "audio_requirement": {
+      "type": "string",
+      "description": "音频要求（可选，§83）：MUTE / KEEP / USE_AS_AMBIENCE / EXTRACT / REPLACE（引擎 build_request 透传 EV audio_requirement）。"
+    },
+    "overlay_requirements": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string"
+      },
+      "description": "叠加层要求（可选，§7/§81）：overlay 内容/静区说明字符串列表（来自 EV overlay_requirements，引擎归一为 array of strings）。"
+    },
+    "provenance_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required"
+      ],
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "description": "是否强制溯源（STRICT 历史请求 required=true，§56-57）。"
+        },
+        "note": {
+          "type": "string",
+          "description": "溯源说明：需要记录哪些字段（§58 Archive Provenance：source institution / original page / creator / date / retrieval date）。"
+        }
+      },
+      "description": "溯源要求（可选，§58）：STRICT 历史请求 required=true；存档素材需记录 source institution / original page / creator / date / retrieval date。"
+    },
+    "search_key": {
+      "type": "string",
+      "description": "相似请求 batch 合并 key（可选，§120）：subject|location 归一化。"
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GENERATIVE_VIDEO",
+        "REAL_FOOTAGE"
+      ],
+      "description": "路由（可选，§52/§78）：REAL_FOOTAGE=真实素材；GENERATIVE_VIDEO=生成（route optimization 双向提案对照，§78-79）。"
+    },
+    "editorial_direction_ref": {
+      "type": "string",
+      "description": "编辑方向引用（可选）：对应 editorial direction 文档/来源标识（如 ED-### / editorial_direction.source）。"
+    },
+    "search_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "candidate_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "候选上限（§119，禁止无限搜索）。"
+        },
+        "provider_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Provider 上限（缺省 ≥1；build_request 缺省 3）。"
+        },
+        "search_depth": {
+          "type": "string",
+          "description": "搜索深度（basic / standard / deep，§119；build_request 由 int 映射：1→basic、2→standard、3→deep）。"
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "TIME",
+            "COST",
+            "BALANCED"
+          ],
+          "description": "搜索优先（§119 time / cost priority）：TIME=时间优先；COST=成本优先；BALANCED=均衡。"
+        },
+        "min_rank_score": {
+          "type": "number",
+          "description": "相关性下限 rank_score（可选，§118；默认 0.25，可配置化 FR-001）。"
+        },
+        "min_semantic_relevance": {
+          "type": "number",
+          "description": "相关性下限 semantic_relevance（可选，§118；默认 0.12，可配置化 FR-001）。"
+        }
+      },
+      "description": "搜索预算（可选，§119）：长视频可能几十条 FR，必须限制单条搜索成本。"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "searching",
+        "waiting_user",
+        "completed",
+        "blocked"
+      ],
+      "description": "请求状态（5 枚举）：draft=草稿；searching=搜索中；waiting_user=等待用户（选择/提供素材）；completed=完成；blocked=已达搜索上限被阻塞（§118）。"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "创建时间（ISO 8601，可选）。"
+    }
+  }
+}

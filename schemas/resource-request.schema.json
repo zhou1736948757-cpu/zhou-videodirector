@@ -1,0 +1,161 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/resource-request.schema.json",
+  "title": "resource_request",
+  "description": "资源请求：Registry 检索的输入契约（Phase-4 Prompt §82）。由 Router（读取 Phase-3 routing 输出）或人工生成；HYBRID Shot 按 Layer 拆多个 request，不产模糊单 query（§114-115）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "project_id",
+    "resource_types",
+    "description",
+    "status"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "pattern": "^RR-\\d{3}$",
+      "description": "请求 ID，格式 RR-###。"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "所属项目 ID。"
+    },
+    "resource_types": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "MOTION_EFFECT",
+          "TRANSITION",
+          "SHOT_RECIPE",
+          "REMOTION_COMPONENT",
+          "THREE_D_MODEL",
+          "TEXTURE",
+          "HDRI",
+          "FOOTAGE",
+          "IMAGE",
+          "SFX",
+          "MUSIC",
+          "SOUNDFONT",
+          "FONT",
+          "REFERENCE",
+          "OTHER"
+        ]
+      },
+      "description": "目标资源类型子集（15 枚举）。"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "资源需求描述（用一句人类可读的话说明要什么、什么语境）。"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "OPEN",
+        "IN_PROGRESS",
+        "SELECTED",
+        "FULFILLED",
+        "CANCELLED"
+      ],
+      "description": "请求状态：OPEN=待检索；IN_PROGRESS=检索中；SELECTED=已选资源；FULFILLED=已获取/落地为 Asset；CANCELLED=取消。"
+    },
+    "scene_id": {
+      "type": "string",
+      "description": "关联 Scene ID（可选）。"
+    },
+    "shot_id": {
+      "type": "string",
+      "description": "关联 Shot ID（可选）。"
+    },
+    "layer_id": {
+      "type": "string",
+      "description": "关联 Layer ID（可选，格式 S###-L##）。"
+    },
+    "style": {
+      "type": "string",
+      "description": "风格要求（来自 VISUAL_BIBLE 的风格标签，供 style_fit 因子使用）。"
+    },
+    "technical_requirements": {
+      "type": "string",
+      "description": "技术要求自由文本（如 \"支持 4k 透明通道\" / \"需要可编辑文字层\"）。"
+    },
+    "license_requirements": {
+      "type": "string",
+      "description": "许可证要求自由文本（如 \"CC0 或可商用\"）；项目商用会触发商业过滤（§62）。"
+    },
+    "size_preference": {
+      "type": "string",
+      "enum": [
+        "LIGHTWEIGHT",
+        "MEDIUM",
+        "LARGE",
+        "ANY"
+      ],
+      "description": "体积偏好（与 Fetch 分类 4 对齐）。"
+    },
+    "quality_preference": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "ANY"
+      ],
+      "description": "质量偏好。"
+    },
+    "local_preferred": {
+      "type": "boolean",
+      "description": "是否优先本地已有资源（local_only 过滤开关）。"
+    },
+    "provider_preferences": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "description": "偏好 Provider 列表（provider.id）。"
+    },
+    "avoid": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "要避免的资源 id 列表（如已知不适合的家族/条目）。"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "创建时间（ISO 8601）。"
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "REMOTION",
+        "THREE_D",
+        "REAL_FOOTAGE",
+        "GENERATIVE_VIDEO",
+        "JY_NATIVE",
+        "HYBRID",
+        "UNDECIDED"
+      ],
+      "description": "Phase-3 routing.route（来自 routing.schema.json）；用于 route-aware 搜索：影响候选资源类型/权重（§43-44）。"
+    },
+    "bake_policy": {
+      "type": "string",
+      "enum": [
+        "BAKE",
+        "KEEP_EDITABLE",
+        "ASSET_REPLACEABLE"
+      ],
+      "description": "烘焙策略（§107）：KEEP_EDITABLE 时不得推荐不可拆 Bake 的资源（须可拆为可编辑层/Asset）。"
+    },
+    "continuity_group": {
+      "type": "string",
+      "description": "连续性分组（Phase-1 continuity_group）：同组请求倾向同一来源/家族，保证视觉连续性（§118-121 family 复用）。"
+    }
+  }
+}

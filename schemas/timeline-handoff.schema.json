@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/timeline-handoff.schema.json",
+  "title": "timeline_handoff_entry",
+  "description": "时间线交接清单条目：TIMELINE_HANDOFF_MANIFEST 的单条记录（Phase-6 Prompt §133-134）。只提示 Asset 应如何进入编辑器（preferred track/start/duration、in/out 点、裁剪/混合/叠加、音频行为、可替换性），不创建时间线、不写死轨道（Phase 7 才做可编辑时间线总装）。audio_behavior 决策沿用 §83-84 五枚举；editability 沿用 asset.editability 三枚举。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "handoff_id",
+    "asset_id",
+    "shot_id",
+    "layer_id",
+    "preferred_track",
+    "preferred_duration",
+    "editability"
+  ],
+  "properties": {
+    "handoff_id": {
+      "type": "string",
+      "pattern": "^TH-\\d{3}$",
+      "description": "交接条目 ID，格式 TH-###（Phase 6 ID 总表见 work/p6-01/SCHEMA_CONTRACT.md）。"
+    },
+    "asset_id": {
+      "type": "string",
+      "pattern": "^A\\d{3}$",
+      "description": "对应资产（A###）。"
+    },
+    "shot_id": {
+      "type": "string",
+      "description": "关联 Shot ID。"
+    },
+    "layer_id": {
+      "type": "string",
+      "description": "关联 Layer ID（如 S###-L##）。"
+    },
+    "preferred_track": {
+      "type": "string",
+      "description": "建议轨道（如 video / overlay / text / sfx / music，复用 asset.timeline_hint.track_hint 语义；仅提示非硬编码，§88/§134）。"
+    },
+    "preferred_start": {
+      "type": "number",
+      "description": "建议起始时间（秒，可选）。"
+    },
+    "preferred_duration": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "建议时长（秒）。"
+    },
+    "editability": {
+      "type": "string",
+      "enum": [
+        "KEEP_EDITABLE",
+        "ASSET_REPLACEABLE",
+        "BAKE"
+      ],
+      "description": "可编辑性（3 枚举，沿 asset.editability / production-request.editability_policy）：KEEP_EDITABLE=时间线内可调；ASSET_REPLACEABLE=内部烘焙但 Asset 可整体替换；BAKE=整体渲染不可拆。"
+    },
+    "in_point": {
+      "type": "string",
+      "description": "源素材入点（时间码，如 00:00:16.100，可选，§71 可用区间）。"
+    },
+    "out_point": {
+      "type": "string",
+      "description": "源素材出点（时间码，可选）。"
+    },
+    "crop": {
+      "type": "string",
+      "description": "裁剪建议（可选，§49/§75）。"
+    },
+    "blend": {
+      "type": "string",
+      "description": "混合建议（如 normal / screen / multiply，可选）。"
+    },
+    "overlay": {
+      "type": "string",
+      "description": "叠加说明（可选：该资产上叠加什么/被什么叠加）。"
+    },
+    "replaceable": {
+      "type": "boolean",
+      "description": "是否可替换（可选）。"
+    },
+    "proxy": {
+      "type": "string",
+      "description": "代理文件路径（可选，§46 大型素材供 Preview 用）。"
+    },
+    "original": {
+      "type": "string",
+      "description": "原始文件路径（可选，§47 始终保留原片）。"
+    },
+    "audio_behavior": {
+      "type": "string",
+      "enum": [
+        "KEEP",
+        "MUTE",
+        "USE_AS_AMBIENCE",
+        "EXTRACT",
+        "REPLACE"
+      ],
+      "description": "音频行为（可选，§83-84 5 枚举）：KEEP=保留；MUTE=静音；USE_AS_AMBIENCE=作环境音；EXTRACT=提取单独使用；REPLACE=替换。"
+    },
+    "speed": {
+      "type": "string",
+      "description": "变速建议（可选，如 0.5x / 1.25x）。"
+    },
+    "overlay_safe_area": {
+      "type": "string",
+      "description": "叠加安全区提示（可选，§72）。"
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/sfx-family.schema.json",
+  "title": "sfx_family",
+  "description": "SFX Family：项目级统一音效语言家族（Phase-5 Prompt §45-§46）。每个项目用少量家族统一 UI/SFX 语言（click / confirm / error / transition / impact / hero / character / frequency_profile / loudness_target），跨 Shot 不重复搜索、同源一致（§118-121 family 复用）；禁止每个资产各做一套音效。SFX_SPEC 通过家族 id 引用复用。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "style",
+    "click",
+    "confirm",
+    "error",
+    "transition",
+    "impact",
+    "hero",
+    "frequency_profile",
+    "loudness_target",
+    "avoid"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^SFXF-[A-Z0-9-]+$",
+      "description": "家族 ID，格式 SFXF-XXX-###（如 SFXF-UI-CLICK-01）；SFX_SPEC 与生产请求引用。"
+    },
+    "name": {
+      "type": "string",
+      "description": "家族名称。"
+    },
+    "style": {
+      "type": "string",
+      "description": "所属风格（引用 AUDIO_DIRECTION / VISUAL_BIBLE 的风格标签）。"
+    },
+    "character": {
+      "type": "string",
+      "description": "声音角色 / 音色特征（如 'soft digital' / 'wooden click' / 'airy whoosh'），定义家族识别度。"
+    },
+    "click": {
+      "type": "string",
+      "description": "点击音规范（Level 1 Invisible Audio：tiny click / soft tick，主要贡献高级感）。"
+    },
+    "confirm": {
+      "type": "string",
+      "description": "确认音规范（完成 / 成功反馈）。"
+    },
+    "error": {
+      "type": "string",
+      "description": "错误音规范（轻柔、不刺耳，符合音频方向语言）。"
+    },
+    "transition": {
+      "type": "string",
+      "description": "转场 / 过渡音规范（Level 2 Narrative Sound：whoosh / riser / page move）。"
+    },
+    "impact": {
+      "type": "string",
+      "description": "冲击音规范（Level 2/3：bass hit / major impact，少量使用）。"
+    },
+    "hero": {
+      "type": "string",
+      "description": "英雄音规范（Level 3 Hero Sound：logo sting / climax transition，极少量）。"
+    },
+    "frequency_profile": {
+      "type": "string",
+      "description": "频率特征（如 '中低频为主，高频柔和' / '全频干净，无刺耳成分'），约束声音制作与选择。"
+    },
+    "loudness_target": {
+      "type": "string",
+      "description": "响度目标（如 '-18 LUFS integrated' / '峰值 -3 dBFS'），用于 Sound QA 响度校验。"
+    },
+    "avoid": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string"
+      },
+      "description": "家族内禁止的音效 / 手法清单（防廉价感 / 防过度叠加）。"
+    }
+  }
+}

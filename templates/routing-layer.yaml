@@ -1,0 +1,37 @@
+# layers/S###.yaml — Layer 路由模板（Phase-3 §54）
+# 用途：仅当 routing/S###.yaml 的 layer_decomposition_required=true 时生成，
+#       落盘 <project>/layers/S###.yaml（一个 Shot 一个文件）。
+# 生成引擎：modules/router/router.py（decompose_layers / to_layers_yaml）。
+# 说明：正式输出前删除全部 # 注释行。
+
+# —— 何时才值得拆 Layer：Layer = Production Responsibility Boundary（§28）——
+# 只有满足以下之一才成为独立 Layer：
+#   1) 可能由不同 Producer 完成；2) 使用不同资源；3) 有不同更新周期；4) 有不同编辑方式。
+# 音频不参与 Layer 路由（由 Shot Audio 体系管理，§25）。
+# 禁止过度 Layer 化（§27）：不要拆成 background gradient / left shadow / icon A 这种无意义数据。
+
+shot_id: S018                              # 所属 Shot ID（S###），与 routing/S###.yaml 的 shot_id 一致
+layers:
+  - id: S018-L01                           # Layer ID：S###-L##（文件级可读标识；layer.schema 内 id 仍为 L###）
+    role: BACKGROUND                       # 角色（16 枚举）：BACKGROUND | FOREGROUND | SUBJECT | TYPOGRAPHY | UI | DATA | 3D_OBJECT | PARTICLE | DECORATION | FOOTAGE | IMAGE | OVERLAY | MASK | LIGHTING | ATMOSPHERE | SUBTITLE
+    route: GENERATIVE_VIDEO                # 该 Layer 的 Route（6 枚举之一）：REMOTION | THREE_D | REAL_FOOTAGE | GENERATIVE_VIDEO | JY_NATIVE | HYBRID
+    bake_policy: ASSET_REPLACEABLE         # Bake 3 值：BAKE=整体渲染，时间线内无需再改；KEEP_EDITABLE=保持时间线可调；ASSET_REPLACEABLE=内部烘焙但整个 Asset 可在时间线上替换
+    z_order: 1                             # z 序（1 = 最底层，越大越靠上）
+    notes: "真实街道黄昏背景，可整体替换重生成"  # 该 Layer 的生产 / 替换备注
+  - id: S018-L02
+    role: TYPOGRAPHY                       # 精确文字层：Route 必为 REMOTION（生成式不得独占文字层，硬约束 §36）
+    route: REMOTION
+    bake_policy: KEEP_EDITABLE             # 文字 / 字幕层一律 KEEP_EDITABLE（Editability Boundary §29）
+    z_order: 2
+    notes: "招牌文字必须精确，参数化可改"
+  - id: S018-L03
+    role: SUBTITLE
+    route: REMOTION
+    bake_policy: KEEP_EDITABLE             # 字幕必须 KEEP_EDITABLE（硬约束 §36）
+    z_order: 3
+    notes: "字幕层保持时间线可编辑"
+
+# —— 常见 bake 决策速查（Editability Boundary §29）——
+# subtitle / B-roll / simple title / music / image        → KEEP_EDITABLE
+# large continuous motion transformation（continuity_group）→ BAKE
+# AI footage / 3D render / Remotion transparent overlay    → ASSET_REPLACEABLE

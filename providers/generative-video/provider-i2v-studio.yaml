@@ -1,0 +1,30 @@
+# provider-i2v-studio.yaml — 示例能力档：Image-to-Video Studio（仅能力档案）
+# 说明：低能力档示例——只支持 image-to-video、无首尾帧、无相机控制、无种子控制，
+# 时长上限 5s、分辨率仅 1080p。**未配置凭据，仅能力档案**（§27）。
+# api_available: false + status: unconfigured —— 不提供任何 endpoint / key 占位。
+# 用途：AC-3 负向样例——8s / 4K 请求对该能力档应判定 unsupported 并给出替代建议（§27）。
+
+provider_id: provider-i2v-studio
+name: Image-to-Video Studio Capability Profile (示例能力档)
+model: UNKNOWN
+text_to_video: false
+image_to_video: true
+first_last_frame: false
+reference_image: true
+character_reference: false
+camera_control: false
+duration_options:
+  - {min: 5, max: 5}
+resolution_options:
+  - "1920x1080"
+aspect_ratios:
+  - "16:9"
+audio_generation: true
+seed_control: false
+commercial_terms: "仅能力档案；本配置未提供任何凭据，实际使用前必须完成授权与成本规则确认（§30/§116）。"
+api_available: false
+manual_generation_supported: true
+negative_prompt_supported: true
+max_prompt_length: 1500
+notes: "示例能力档（未配置凭据，仅能力档案）。仅图→视频、单档 5s/1080p/16:9；用于演示 capability_check 的 unsupported 判定与替代建议。"
+status: unconfigured

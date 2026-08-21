@@ -1,0 +1,558 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/timeline.schema.json",
+  "title": "timeline",
+  "description": "可编辑时间线工程：为未来 pyJianYingDraft / VectCut / pyCapCut 预留的统一时间线结构（Phase-1 Prompt §29；Phase-7 Prompt §11-16/§24-27/§31-37/§85-88/§99/§107-108 扩展：Phase 1 旧字段与 required 全部保留，新增字段全可选，向后兼容——tracks/clips 旧形状通过 oneOf 的旧形状分支继续可过）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "backend",
+    "project_path",
+    "canvas",
+    "fps",
+    "resolution",
+    "tracks",
+    "clips",
+    "text_items",
+    "subtitle_items",
+    "audio_tracks",
+    "sfx_tracks",
+    "music_tracks",
+    "overlays",
+    "keyframes",
+    "transitions",
+    "asset_links",
+    "replaceable_assets",
+    "manual_edit_safe",
+    "version",
+    "status"
+  ],
+  "properties": {
+    "timeline_id": {
+      "type": "string",
+      "pattern": "^TL-\\d{3}$",
+      "description": "时间线 ID，格式 TL-###（Phase-7 Prompt §11；ID 总表见 work/p7-2/SCHEMA_CONTRACT7.md）。"
+    },
+    "backend": {
+      "type": "string",
+      "enum": [
+        "PYJIANYINGDRAFT",
+        "VECTCUT",
+        "PYCAPCUT",
+        "FUTURE",
+        "UNDECIDED"
+      ],
+      "description": "时间线后端（沿用 Phase-1；值域含 FUTURE/UNDECIDED 保留 Phase-1 原枚举，不回缩）。"
+    },
+    "preferred_timeline_backend": {
+      "type": "string",
+      "enum": [
+        "AUTO",
+        "PYJIANYINGDRAFT",
+        "VECTCUT",
+        "PYCAPCUT"
+      ],
+      "description": "项目级首选时间线后端（可选，Phase-7 Prompt §145 backend_choice 四枚举）：AUTO=自动选择；PYJIANYINGDRAFT=剪映草稿；VECTCUT=未来 VectCut；PYCAPCUT=未来 CapCut。"
+    },
+    "backend_version": {
+      "type": "string",
+      "description": "后端实现版本（可选，Phase-7 Prompt §11/§91，如 pyjianyingdraft 0.3.0）。"
+    },
+    "project_path": {
+      "type": "string",
+      "description": "工程路径。"
+    },
+    "canvas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "w",
+        "h"
+      ],
+      "properties": {
+        "w": {
+          "type": "integer",
+          "description": "画布宽度（像素）。"
+        },
+        "h": {
+          "type": "integer",
+          "description": "画布高度（像素）。"
+        }
+      },
+      "description": "画布尺寸。"
+    },
+    "fps": {
+      "type": "number",
+      "description": "帧率。"
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "w",
+        "h"
+      ],
+      "properties": {
+        "w": {
+          "type": "integer",
+          "description": "分辨率宽度（像素）。"
+        },
+        "h": {
+          "type": "integer",
+          "description": "分辨率高度（像素）。"
+        }
+      },
+      "description": "分辨率。"
+    },
+    "duration_frames": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "时间线总时长（帧，可选，Phase-7 Prompt §26-27）：以整数帧为 Canonical Timing，避免浮点误差累积。"
+    },
+    "tracks": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/timeline_track"
+          },
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "not": {
+              "required": [
+                "track_id"
+              ]
+            },
+            "description": "兼容 Phase-1 旧轨道形状（无 track_id 的任意对象，结构由 Timeline Backend 定义）。"
+          }
+        ]
+      },
+      "description": "轨道列表。新形状见 #/definitions/timeline_track（§14 九键）；oneOf 第二分支兼容 Phase-1 旧形状（无 track_id）。"
+    },
+    "clips": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "timeline-clip.schema.json"
+          },
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "not": {
+              "required": [
+                "clip_id"
+              ]
+            },
+            "description": "兼容 Phase-1 旧片段形状（无 clip_id 的任意对象，结构由 Timeline Backend 定义）。"
+          }
+        ]
+      },
+      "description": "片段列表。新形状引用 timeline-clip.schema.json（§29 全字段）；oneOf 第二分支兼容 Phase-1 旧形状（无 clip_id）。"
+    },
+    "text_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "文字项（结构由 Timeline Backend 定义）。"
+      },
+      "description": "文字列表。"
+    },
+    "subtitle_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "字幕项（结构由 Timeline Backend 定义；Phase-7 结构化字幕见 subtitle.schema.json）。"
+      },
+      "description": "字幕列表。"
+    },
+    "audio_tracks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "音频轨（结构由 Timeline Backend 定义）。"
+      },
+      "description": "音频轨列表。"
+    },
+    "sfx_tracks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "SFX 轨（结构由 Timeline Backend 定义）。"
+      },
+      "description": "音效轨列表。"
+    },
+    "music_tracks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "音乐轨（结构由 Timeline Backend 定义）。"
+      },
+      "description": "音乐轨列表。"
+    },
+    "overlays": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "覆盖层（结构由 Timeline Backend 定义）。"
+      },
+      "description": "覆盖层列表。"
+    },
+    "keyframes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "关键帧（结构由 Timeline Backend 定义；Phase-7 结构化关键帧见 timeline-clip.schema.json keyframes）。"
+      },
+      "description": "关键帧列表。"
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "转场（结构由 Timeline Backend 定义）。"
+      },
+      "description": "转场列表。"
+    },
+    "markers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "marker_id",
+          "frame"
+        ],
+        "properties": {
+          "marker_id": {
+            "type": "string",
+            "pattern": "^MK-\\d{3}$",
+            "description": "标记 ID，格式 MK-###（Phase-7 ID 总表）。"
+          },
+          "frame": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "标记所在帧。"
+          },
+          "type": {
+            "type": "string",
+            "description": "标记类型（Phase-7 Prompt §85：Scene start / Chapter / Hero moment / Review point / Music change / Important sync 等，可扩展）。"
+          },
+          "label": {
+            "type": "string",
+            "description": "标记标签（可选，人类可读）。"
+          }
+        },
+        "description": "时间线标记（可选，Phase-7 Prompt §85-86）：对人工编辑非常重要，后端不支持 Marker 时保存在 Manifest。"
+      },
+      "description": "时间线标记列表（可选，§85）。"
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "group_id": {
+            "type": "string",
+            "description": "组 ID（可选，如 GRP-###）。"
+          },
+          "name": {
+            "type": "string",
+            "description": "组名称（可选）。"
+          },
+          "clip_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^TC-\\d{3}$"
+            },
+            "description": "组内 clip 引用（可选）。"
+          }
+        },
+        "description": "片段组（可选，Phase-7 Prompt §11 groups；如结构组 / 逻辑组）。"
+      },
+      "description": "片段组列表（可选）。"
+    },
+    "asset_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "资产链接（结构由 Timeline Backend 定义）。"
+      },
+      "description": "资产链接列表。"
+    },
+    "replaceable_assets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^A\\d{3}$",
+        "description": "可替换资产 ID，格式 A###。"
+      },
+      "description": "可替换资产列表。"
+    },
+    "continuity_groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "continuity_group": {
+            "type": "string",
+            "description": "连续性组标识（如 CG-04，可选，Phase-7 Prompt §8）。"
+          },
+          "clip_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^TC-\\d{3}$"
+            },
+            "description": "组内 clip 引用（可选）。"
+          }
+        },
+        "description": "连续性组（可选，Phase-7 Prompt §8/§11）：复杂连续 Motion 必须保持整体，不得拆开破坏连续性。"
+      },
+      "description": "连续性组列表（可选）。"
+    },
+    "editability": {
+      "type": "string",
+      "enum": [
+        "KEEP_EDITABLE",
+        "ASSET_REPLACEABLE",
+        "BAKE"
+      ],
+      "description": "时间线级可编辑性（可选，沿 Phase-3 bake_policy 三枚举，Phase-7 Prompt §6-7/§11）：KEEP_EDITABLE=时间线内可调；ASSET_REPLACEABLE=内部烘焙但 Asset 可整体替换；BAKE=整体渲染不可拆。"
+    },
+    "backend_capabilities": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "basic_video": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "multi_track": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "text": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "subtitle": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "position_keyframe": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "scale_keyframe": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "rotation_keyframe": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "opacity_keyframe": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "volume_keyframe": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "transition": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "filter": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "mask": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "blend_mode": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "effect_parameter_keyframe": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "bezier_easing": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "custom_motion_path": {
+          "$ref": "#/definitions/capability_entry"
+        },
+        "template_import": {
+          "$ref": "#/definitions/capability_entry"
+        }
+      },
+      "description": "后端能力矩阵（可选，Phase-7 Prompt §43-44，能力名以 §43 为准）：每项 {supported, fallback, evidence}，与 P7-1 BACKEND_CAPABILITY_REPORT 呼应；不支持的写 false，禁止假装支持。"
+    },
+    "timeline_map_ref": {
+      "type": "string",
+      "description": "人类可读时间线地图引用（可选，Phase-7 Prompt §87-88 TIMELINE_MAP.md 路径）。"
+    },
+    "ownership": {
+      "type": "string",
+      "enum": [
+        "GENERATED_BASELINE",
+        "HUMAN_EDITED",
+        "AI_PATCHABLE",
+        "LOCKED"
+      ],
+      "description": "草稿所有权（可选，Phase-7 Prompt §99-101/§106 draft_ownership 四枚举）：GENERATED_BASELINE=首次 AI 生成基线；HUMAN_EDITED=用户已手工修改；AI_PATCHABLE=AI 可补丁式修改；LOCKED=锁定不改。"
+    },
+    "locked_regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "target_type",
+          "target_id"
+        ],
+        "properties": {
+          "target_type": {
+            "type": "string",
+            "enum": [
+              "shot",
+              "track",
+              "clip"
+            ],
+            "description": "锁定对象类型（Phase-7 Prompt §107：shot_locked / track_locked / clip_locked）。"
+          },
+          "target_id": {
+            "type": "string",
+            "description": "锁定对象 ID（如 S001 / TR-001 / TC-001）。"
+          },
+          "reason": {
+            "type": "string",
+            "description": "锁定原因（可选）。"
+          }
+        },
+        "description": "锁定区域（可选，Phase-7 Prompt §107）：AI 后续不得修改。"
+      },
+      "description": "锁定区域列表（可选）。"
+    },
+    "baseline_ref": {
+      "type": "string",
+      "description": "基线快照引用（可选，Phase-7 Prompt §138 baseline manifest snapshot，供以后 Diff）。"
+    },
+    "manual_edit_safe": {
+      "type": "boolean",
+      "description": "是否人工可编辑安全（避免全 Bake）。"
+    },
+    "version": {
+      "type": "string",
+      "description": "时间线版本。"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "waiting_user",
+        "approved",
+        "completed",
+        "skipped",
+        "blocked",
+        "failed",
+        "superseded"
+      ],
+      "description": "时间线状态。"
+    }
+  },
+  "definitions": {
+    "timeline_track": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "track_id",
+        "type"
+      ],
+      "properties": {
+        "track_id": {
+          "type": "string",
+          "pattern": "^TR-\\d{3}$",
+          "description": "轨道 ID，格式 TR-###（Phase-7 ID 总表）。"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "VIDEO_MAIN",
+            "VIDEO_BROLL",
+            "VIDEO_OVERLAY",
+            "VIDEO_MOTION",
+            "VIDEO_3D",
+            "VIDEO_AI",
+            "IMAGE",
+            "TEXT",
+            "SUBTITLE",
+            "GRAPHIC",
+            "VOICEOVER",
+            "MUSIC",
+            "SFX",
+            "AMBIENCE",
+            "UTILITY"
+          ],
+          "description": "轨道类型（15 枚举，Phase-7 Prompt §15）。"
+        },
+        "name": {
+          "type": "string",
+          "description": "轨道名称（可选，如 V1_MAIN / T2_SUBTITLES，Phase-7 Prompt §133 推荐命名）。"
+        },
+        "order": {
+          "type": "integer",
+          "description": "轨道顺序（可选）。"
+        },
+        "locked": {
+          "type": "boolean",
+          "description": "是否锁定（可选，§107）。"
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "是否可见（可选）。"
+        },
+        "muted": {
+          "type": "boolean",
+          "description": "是否静音（可选）。"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "轨道用途说明（可选，如 Main / B-roll / Titles）。"
+        },
+        "backend_mapping": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "后端轨道映射（可选，Phase-7 Prompt §14）：后端轨道引用（如 JianYing track id / 名称）。"
+        }
+      },
+      "description": "Phase-7 轨道九键（§14）：track_id/type/name/order/locked/visible/muted/purpose/backend_mapping。"
+    },
+    "capability_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "supported"
+      ],
+      "properties": {
+        "supported": {
+          "type": "boolean",
+          "description": "是否支持（§43-44；不支持的写 false，禁止假装）。"
+        },
+        "fallback": {
+          "type": "string",
+          "description": "不支持时的回退方案（可选，如 render as Remotion asset，§44/§92）。"
+        },
+        "evidence": {
+          "type": "string",
+          "description": "证据（可选，如包源码文件:行）。"
+        }
+      },
+      "description": "能力矩阵条目：{supported, fallback, evidence}（Phase-7 Prompt §43-44）。"
+    }
+  }
+}

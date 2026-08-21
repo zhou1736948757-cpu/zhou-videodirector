@@ -1,0 +1,37 @@
+# provider-t2v-cinematic.yaml — 示例能力档：Cinematic Text-to-Video（仅能力档案）
+# 说明：这是"真实存在的模型能力档"的示例（高能力档：t2v + i2v + 首尾帧 + 角色参考 +
+# 相机控制 + 种子控制），**未配置凭据，仅能力档案**（§27）。
+# api_available: false + status: unconfigured —— 仅用于演示 capability_check，
+# 不提供任何 endpoint / key 占位，不产生任何真实调用。
+# 用途：AC-3 正向样例——8s / 4K 请求对该能力档应判定"支持"。
+
+provider_id: provider-t2v-cinematic
+name: Cinematic Text-to-Video Capability Profile (示例能力档)
+model: UNKNOWN
+text_to_video: true
+image_to_video: true
+first_last_frame: true
+reference_image: true
+character_reference: true
+camera_control: true
+duration_options:
+  - {min: 5, max: 5}
+  - {min: 8, max: 8}
+  - {min: 10, max: 10}
+resolution_options:
+  - "1280x720"
+  - "1920x1080"
+  - "3840x2160"
+aspect_ratios:
+  - "16:9"
+  - "9:16"
+  - "2.39:1"
+audio_generation: false
+seed_control: true
+commercial_terms: "仅能力档案；本配置未提供任何凭据，实际使用前必须完成授权与成本规则确认（§30/§116）。"
+api_available: false
+manual_generation_supported: true
+negative_prompt_supported: true
+max_prompt_length: 3000
+notes: "示例能力档（未配置凭据，仅能力档案）。支持 5/8/10 秒、720p/1080p/4K；用于演示 capability_check 通过场景。"
+status: unconfigured

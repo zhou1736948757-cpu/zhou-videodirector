@@ -1,0 +1,338 @@
+{
+  "version": "phase1-v0.2",
+  "description": "ZHOU_Videodirector Phase 1 状态机机器可读真源（简化可读数据，非 JSON Schema 验证器）。人类可读说明见 docs/state-machine.md。",
+  "stages": [
+    {
+      "id": "INIT",
+      "description": "项目初始化，建立项目目录结构与初始记忆文件；状态机入口。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["PROJECT_INTAKE"]
+    },
+    {
+      "id": "PROJECT_INTAKE",
+      "description": "Grill Me 需求采集，产出 Project Brief（目标、平台、时长、制作/交付模式、优先级）。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["PROJECT_BRIEF_REVIEW"]
+    },
+    {
+      "id": "PROJECT_BRIEF_REVIEW",
+      "description": "审批 Project Brief 内容，用户确认后进入导演流程。",
+      "requires_approval": true,
+      "skippable": false,
+      "allowed_next": ["REFERENCE_ANALYSIS", "PROJECT_INTAKE"]
+    },
+    {
+      "id": "REFERENCE_ANALYSIS",
+      "description": "分析参考视频/素材，产出 REFERENCE_ANALYSIS.md（无参考时跳过）。",
+      "requires_approval": false,
+      "skippable": true,
+      "allowed_next": ["REFERENCE_REVIEW"]
+    },
+    {
+      "id": "REFERENCE_REVIEW",
+      "description": "审批参考分析报告，确认从参考中提取的规律（不逐镜复制）。",
+      "requires_approval": true,
+      "skippable": true,
+      "allowed_next": ["CREATIVE_DIRECTION", "REFERENCE_ANALYSIS"]
+    },
+    {
+      "id": "CREATIVE_DIRECTION",
+      "description": "创意导演产出 CREATIVE_DIRECTION.md（Hook / Core Idea / 情绪方向）。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["CREATIVE_REVIEW"]
+    },
+    {
+      "id": "CREATIVE_REVIEW",
+      "description": "审批创意方向。",
+      "requires_approval": true,
+      "skippable": false,
+      "allowed_next": ["STYLE_DIRECTION", "CREATIVE_DIRECTION"]
+    },
+    {
+      "id": "STYLE_DIRECTION",
+      "description": "风格导演推荐 Style，产出 VISUAL_BIBLE.md。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["VISUAL_BIBLE_REVIEW"]
+    },
+    {
+      "id": "VISUAL_BIBLE_REVIEW",
+      "description": "审批 Visual Bible（色彩/字体/构图/运镜/动效等视觉最高约束）。",
+      "requires_approval": true,
+      "skippable": false,
+      "allowed_next": ["SOUND_DIRECTION", "STYLE_DIRECTION"]
+    },
+    {
+      "id": "SOUND_DIRECTION",
+      "description": "声音导演产出 AUDIO_DIRECTION.md（音乐方向 / SFX 语言 / 环境音）。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["AUDIO_DIRECTION_REVIEW"]
+    },
+    {
+      "id": "AUDIO_DIRECTION_REVIEW",
+      "description": "审批 Audio Direction。",
+      "requires_approval": true,
+      "skippable": false,
+      "allowed_next": ["EDITORIAL_DIRECTION", "SOUND_DIRECTION"]
+    },
+    {
+      "id": "EDITORIAL_DIRECTION",
+      "description": "编辑导演产出 STORY / BEAT MAP（叙事结构、章节、节奏）。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["STORY_REVIEW"]
+    },
+    {
+      "id": "STORY_REVIEW",
+      "description": "审批故事结构与 Beat Map。",
+      "requires_approval": true,
+      "skippable": false,
+      "allowed_next": ["STORYBOARD", "EDITORIAL_DIRECTION"]
+    },
+    {
+      "id": "STORYBOARD",
+      "description": "分镜引擎产出 Scene / Shot / Layer 层级故事板。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["STORYBOARD_REVIEW"]
+    },
+    {
+      "id": "STORYBOARD_REVIEW",
+      "description": "审批故事板（Scene / Shot / Layer 划分与设计）。",
+      "requires_approval": true,
+      "skippable": false,
+      "allowed_next": ["SUBAGENT_CONFIGURATION", "STORYBOARD"]
+    },
+    {
+      "id": "SUBAGENT_CONFIGURATION",
+      "description": "配置 Subagent 数量/模型/职责/并发（无需 Subagent 时跳过）。",
+      "requires_approval": false,
+      "skippable": true,
+      "allowed_next": ["SHOT_ROUTING"]
+    },
+    {
+      "id": "SHOT_ROUTING",
+      "description": "Shot 级技术路由（REMOTION / THREE_D / REAL_FOOTAGE / GENERATIVE_VIDEO / JY_NATIVE / HYBRID）。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["LAYER_ROUTING"]
+    },
+    {
+      "id": "LAYER_ROUTING",
+      "description": "必要时 Layer 级技术路由与 z 序分解。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["ROUTING_REVIEW"]
+    },
+    {
+      "id": "ROUTING_REVIEW",
+      "description": "审批 Routing Plan（Shot/Layer 路由、Bake 与 Editability 策略、Prototype 需求），通过后进入资源规划。",
+      "requires_approval": true,
+      "skippable": false,
+      "allowed_next": ["RESOURCE_PLANNING"]
+    },
+    {
+      "id": "RESOURCE_PLANNING",
+      "description": "资源规划（Registry 搜索 + Asset Plan + Sound Plan），产出 PRODUCTION_PLAN。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["PRODUCTION_PLAN_REVIEW"]
+    },
+    {
+      "id": "PRODUCTION_PLAN_REVIEW",
+      "description": "审批 Production Plan（Asset 计划 / Sound 计划 / 时间与成本）。",
+      "requires_approval": true,
+      "skippable": false,
+      "allowed_next": ["ASSET_ACQUISITION", "RESOURCE_PLANNING"]
+    },
+    {
+      "id": "ASSET_ACQUISITION",
+      "description": "获取素材（Registry / Provider 下载），受 Execution Approval 约束。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["ASSET_PRODUCTION"]
+    },
+    {
+      "id": "ASSET_PRODUCTION",
+      "description": "生产资产（Remotion / Three.js / AI Video / Footage / Music / SFX），产出 Asset Package。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["TIMELINE_BUILD"]
+    },
+    {
+      "id": "TIMELINE_BUILD",
+      "description": "用 pyJianYingDraft 等后端构建可编辑时间线草稿。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["TIMELINE_REVIEW"]
+    },
+    {
+      "id": "TIMELINE_REVIEW",
+      "description": "审批时间线计划/草稿结构（轨道、剪辑、可编辑边界）。",
+      "requires_approval": true,
+      "skippable": false,
+      "allowed_next": ["PREVIEW", "TIMELINE_BUILD"]
+    },
+    {
+      "id": "PREVIEW",
+      "description": "预览成片，供 QA 与用户查看。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["QA"]
+    },
+    {
+      "id": "QA",
+      "description": "四层 QA（Technical / Visual / Editorial / Sound）并审批 QA 结果。",
+      "requires_approval": true,
+      "skippable": false,
+      "allowed_next": ["CHANGE_REVIEW", "PREVIEW"]
+    },
+    {
+      "id": "CHANGE_REVIEW",
+      "description": "审批 CHANGE PROPOSAL；通过后可迁至任意非 COMPLETE 阶段返工（见 transition_rules.change_review_post_qa）。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": [
+        "INIT",
+        "PROJECT_INTAKE",
+        "PROJECT_BRIEF_REVIEW",
+        "REFERENCE_ANALYSIS",
+        "REFERENCE_REVIEW",
+        "CREATIVE_DIRECTION",
+        "CREATIVE_REVIEW",
+        "STYLE_DIRECTION",
+        "VISUAL_BIBLE_REVIEW",
+        "SOUND_DIRECTION",
+        "AUDIO_DIRECTION_REVIEW",
+        "EDITORIAL_DIRECTION",
+        "STORY_REVIEW",
+        "STORYBOARD",
+        "STORYBOARD_REVIEW",
+        "SUBAGENT_CONFIGURATION",
+        "SHOT_ROUTING",
+        "LAYER_ROUTING",
+        "ROUTING_REVIEW",
+        "RESOURCE_PLANNING",
+        "PRODUCTION_PLAN_REVIEW",
+        "ASSET_ACQUISITION",
+        "ASSET_PRODUCTION",
+        "TIMELINE_BUILD",
+        "TIMELINE_REVIEW",
+        "PREVIEW",
+        "QA",
+        "CHANGE_REVIEW",
+        "FINAL_EDIT",
+        "FINAL_RENDER"
+      ]
+    },
+    {
+      "id": "FINAL_EDIT",
+      "description": "最终人工 + AI 联合编辑。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["FINAL_RENDER"]
+    },
+    {
+      "id": "FINAL_RENDER",
+      "description": "最终渲染输出 final.mp4 等交付物。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": ["COMPLETE"]
+    },
+    {
+      "id": "COMPLETE",
+      "description": "项目完成，收尾归档（终态）。",
+      "requires_approval": false,
+      "skippable": false,
+      "allowed_next": []
+    }
+  ],
+  "stage_status_enum": [
+    "not_started",
+    "in_progress",
+    "waiting_user",
+    "approved",
+    "completed",
+    "skipped",
+    "blocked",
+    "failed",
+    "superseded"
+  ],
+  "approval_status_enum": [
+    "pending",
+    "approved",
+    "rejected",
+    "revision_requested",
+    "superseded"
+  ],
+  "requires_approval_stages": [
+    "PROJECT_BRIEF_REVIEW",
+    "REFERENCE_REVIEW",
+    "CREATIVE_REVIEW",
+    "VISUAL_BIBLE_REVIEW",
+    "AUDIO_DIRECTION_REVIEW",
+    "STORY_REVIEW",
+    "STORYBOARD_REVIEW",
+    "ROUTING_REVIEW",
+    "PRODUCTION_PLAN_REVIEW",
+    "TIMELINE_REVIEW",
+    "QA"
+  ],
+  "transition_rules": {
+    "normal_next_per_stage": {
+      "INIT": "PROJECT_INTAKE",
+      "PROJECT_INTAKE": "PROJECT_BRIEF_REVIEW",
+      "PROJECT_BRIEF_REVIEW": "REFERENCE_ANALYSIS",
+      "REFERENCE_ANALYSIS": "REFERENCE_REVIEW",
+      "REFERENCE_REVIEW": "CREATIVE_DIRECTION",
+      "CREATIVE_DIRECTION": "CREATIVE_REVIEW",
+      "CREATIVE_REVIEW": "STYLE_DIRECTION",
+      "STYLE_DIRECTION": "VISUAL_BIBLE_REVIEW",
+      "VISUAL_BIBLE_REVIEW": "SOUND_DIRECTION",
+      "SOUND_DIRECTION": "AUDIO_DIRECTION_REVIEW",
+      "AUDIO_DIRECTION_REVIEW": "EDITORIAL_DIRECTION",
+      "EDITORIAL_DIRECTION": "STORY_REVIEW",
+      "STORY_REVIEW": "STORYBOARD",
+      "STORYBOARD": "STORYBOARD_REVIEW",
+      "STORYBOARD_REVIEW": "SUBAGENT_CONFIGURATION",
+      "SUBAGENT_CONFIGURATION": "SHOT_ROUTING",
+      "SHOT_ROUTING": "LAYER_ROUTING",
+      "LAYER_ROUTING": "ROUTING_REVIEW",
+      "ROUTING_REVIEW": "RESOURCE_PLANNING",
+      "RESOURCE_PLANNING": "PRODUCTION_PLAN_REVIEW",
+      "PRODUCTION_PLAN_REVIEW": "ASSET_ACQUISITION",
+      "ASSET_ACQUISITION": "ASSET_PRODUCTION",
+      "ASSET_PRODUCTION": "TIMELINE_BUILD",
+      "TIMELINE_BUILD": "TIMELINE_REVIEW",
+      "TIMELINE_REVIEW": "PREVIEW",
+      "PREVIEW": "QA",
+      "QA": "CHANGE_REVIEW",
+      "CHANGE_REVIEW": "FINAL_EDIT",
+      "FINAL_EDIT": "FINAL_RENDER",
+      "FINAL_RENDER": "COMPLETE",
+      "COMPLETE": null
+    },
+    "review_revision": {
+      "PROJECT_BRIEF_REVIEW": "PROJECT_INTAKE",
+      "REFERENCE_REVIEW": "REFERENCE_ANALYSIS",
+      "CREATIVE_REVIEW": "CREATIVE_DIRECTION",
+      "VISUAL_BIBLE_REVIEW": "STYLE_DIRECTION",
+      "AUDIO_DIRECTION_REVIEW": "SOUND_DIRECTION",
+      "STORY_REVIEW": "EDITORIAL_DIRECTION",
+      "STORYBOARD_REVIEW": "STORYBOARD",
+      "ROUTING_REVIEW": "SHOT_ROUTING",
+      "PRODUCTION_PLAN_REVIEW": "RESOURCE_PLANNING",
+      "TIMELINE_REVIEW": "TIMELINE_BUILD",
+      "QA": "PREVIEW"
+    },
+    "change_review_post_qa": {
+      "after": "QA",
+      "allowed_target": "any_stage_except_COMPLETE",
+      "requires_new_approval": true
+    }
+  }
+}

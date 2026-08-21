@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/audio-direction.schema.json",
+  "title": "audio_direction",
+  "description": "声音方向：与视觉方向同级的音频设计规范（Phase-1 Prompt §26 / 总设计 §10）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "music_direction",
+    "music_route",
+    "mood",
+    "energy",
+    "bpm_range",
+    "instrumentation",
+    "voiceover_priority",
+    "ducking_strategy",
+    "sfx_language",
+    "ambience",
+    "ui_sound_language",
+    "motion_sound_language",
+    "hero_sound_policy",
+    "silence_policy",
+    "sonic_motif",
+    "avoid",
+    "references"
+  ],
+  "properties": {
+    "music_direction": {
+      "type": "string",
+      "description": "音乐方向说明。"
+    },
+    "music_route": {
+      "type": "string",
+      "enum": [
+        "LIBRARY_MUSIC",
+        "PROCEDURAL_MUSIC",
+        "GENERATIVE_MUSIC",
+        "HYBRID_MUSIC",
+        "UNDECIDED"
+      ],
+      "description": "音乐获取路线。"
+    },
+    "mood": {
+      "type": "string",
+      "description": "整体情绪基调。"
+    },
+    "energy": {
+      "type": "string",
+      "description": "能量水平说明。"
+    },
+    "bpm_range": {
+      "type": "string",
+      "description": "BPM 范围，如 \"90-120\"。"
+    },
+    "instrumentation": {
+      "type": "string",
+      "description": "乐器配置说明。"
+    },
+    "voiceover_priority": {
+      "type": "string",
+      "description": "旁白优先程度说明。"
+    },
+    "ducking_strategy": {
+      "type": "string",
+      "description": "闪避（Ducking）策略。"
+    },
+    "sfx_language": {
+      "type": "string",
+      "description": "音效语言规范（SFX 种类与风格）。"
+    },
+    "ambience": {
+      "type": "string",
+      "description": "环境声规范。"
+    },
+    "ui_sound_language": {
+      "type": "string",
+      "description": "UI 声音语言规范。"
+    },
+    "motion_sound_language": {
+      "type": "string",
+      "description": "动效声音语言规范。"
+    },
+    "hero_sound_policy": {
+      "type": "string",
+      "description": "Hero Sound 使用策略。"
+    },
+    "silence_policy": {
+      "type": "string",
+      "description": "静音使用策略。"
+    },
+    "sonic_motif": {
+      "type": "string",
+      "description": "声音母题（Sonic Motif）。"
+    },
+    "avoid": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "需要避免的声音清单。"
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "音频参考（链接或路径）。"
+    }
+  }
+}

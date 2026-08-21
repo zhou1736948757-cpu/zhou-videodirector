@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "ZHOU_Videodirector Route 定义（Phase-3 Shot / Layer Router）",
+  "description": "6 条技术 Route 的机器可读定义，供 router.py 生成候选与 README/文档引用。suitable_scenes 与 forbidden_scenes 摘录自 Phase-3 Prompt §17-22 与 workflows/routing.md。",
+  "route_enum": [
+    "REMOTION",
+    "THREE_D",
+    "REAL_FOOTAGE",
+    "GENERATIVE_VIDEO",
+    "JY_NATIVE",
+    "HYBRID"
+  ],
+  "routes": {
+    "REMOTION": {
+      "name": "Remotion 程序化合成",
+      "suitable_scenes": [
+        "高结构化 UI / 界面动画（dashboard / 卡片 / 栅格布局）",
+        "Kinetic Typography 与精确排版",
+        "数据可视化（图表 chart / map / timeline / 数字跳动）",
+        "需要精确时间轴与音画同步（sync_points）的内容",
+        "频繁修改 / 文案参数化 / 需要可编辑源的内容",
+        "程序化 motion graphic（stagger / spring / 逐字浮现）"
+      ],
+      "core_features": [
+        "代码驱动合成，布局、文字、数据完全参数化",
+        "帧级时间精度（timing_precision），可逐帧控制",
+        "再渲染快速，修订成本低（revision_requirement 友好）",
+        "文字 / UI 准确度天然保证（text_accuracy / data_accuracy）"
+      ],
+      "forbidden_scenes": [
+        "真人 / 头发 / 皮肤 / 水 / 烟等有机写实运动（无真实感渲染能力）",
+        "高 Scene Entropy 的真实世界环境",
+        "需要真实光照与摄影级真实感的内容",
+        "长段连续复杂环境镜头"
+      ],
+      "typical_bake_default": "KEEP_EDITABLE",
+      "cost_profile": "LOW"
+    },
+    "THREE_D": {
+      "name": "3D 渲染管线",
+      "suitable_scenes": [
+        "产品模型 / 芯片 / 机械结构展示",
+        "爆炸图（exploded view）与零件拆解",
+        "Camera orbit / 环绕镜头 / 3D UI",
+        "需要物理正确性或空间纵深的空间叙事",
+        "2.5D / 伪 3D 纵深隐喻（产品可借用）"
+      ],
+      "core_features": [
+        "模型、材质、灯光、相机完全可控",
+        "物理 / 结构复杂度（physical_complexity）与相机复杂度（camera_complexity）处理能力",
+        "渲染结果作为可替换资产交付（ASSET_REPLACEABLE）",
+        "适合结构精密但不需要真实世界内容的对象"
+      ],
+      "forbidden_scenes": [
+        "以文字准确性为主的纯 2D UI（除非文字独立分层）",
+        "真人级有机运动与照片级人物写实",
+        "纯剪辑 / 字幕 / Ken Burns 等简单内容（过度工程）"
+      ],
+      "typical_bake_default": "ASSET_REPLACEABLE",
+      "cost_profile": "HIGH"
+    },
+    "REAL_FOOTAGE": {
+      "name": "真实素材（实拍 / 资料库）",
+      "suitable_scenes": [
+        "真实世界 / 街道 / 人群 / 自然环境",
+        "Archive / NASA / Public Domain / 授权实拍素材",
+        "文档叙事 / 纪录片 / 真人出镜",
+        "已有可用素材时优先复用（Available Assets 含 footage / 录屏）"
+      ],
+      "core_features": [
+        "照片级真实感（photorealism）天然成立",
+        "有机运动（organic_motion）与高 Scene Entropy 场景",
+        "无渲染成本，剪辑友好（KEEP_EDITABLE）"
+      ],
+      "forbidden_scenes": [
+        "精确文字 / 数据驱动 UI（除非叠加分层）",
+        "现实中不存在的产品 / 场景",
+        "需要精确程序化时序的复杂动画编排"
+      ],
+      "typical_bake_default": "KEEP_EDITABLE",
+      "cost_profile": "MEDIUM"
+    },
+    "GENERATIVE_VIDEO": {
+      "name": "AI 生成视频",
+      "suitable_scenes": [
+        "高 Scene Entropy / 真人 / 自然运动 / 复杂光照",
+        "需要照片级真实感但无法实拍或无可拍条件的内容",
+        "梦境 / 抽象氛围 / 概念环境",
+        "真实素材库缺失的写实场景"
+      ],
+      "core_features": [
+        "生成式照片级真实感（photorealism / atmosphere_requirement）",
+        "有机运动与复杂光照处理",
+        "无实拍成本，按需生成"
+      ],
+      "forbidden_scenes": [
+        "精确文字 / 角标 / 字幕（生成式无法保证逐字准确）",
+        "关键数据展示（数据必须由结构化 Producer 产出）",
+        "帧级精确音画同步与严格时序编排",
+        "频繁修改 / 需要精确可编辑源的内容"
+      ],
+      "typical_bake_default": "ASSET_REPLACEABLE",
+      "cost_profile": "HIGH"
+    },
+    "JY_NATIVE": {
+      "name": "剪映原生剪辑",
+      "suitable_scenes": [
+        "普通剪辑 / 简单切换",
+        "照片慢推（Ken Burns / photo slow zoom）",
+        "字幕 / 角标 / B-roll",
+        "简单转场与时间线拼接",
+        "无需精确时序的收尾镜头（如 Logo 淡入淡出）"
+      ],
+      "core_features": [
+        "时间线原生、成本最低、产出最快",
+        "完全可编辑（KEEP_EDITABLE）",
+        "适合低复杂度、低精度需求的镜头"
+      ],
+      "forbidden_scenes": [
+        "复杂程序化 motion（morph / procedural graph / 精确多元素编排）",
+        "复杂空间相机（spatial camera）与高 Camera Complexity",
+        "3D / 物理仿真 / 高精度数据可视化"
+      ],
+      "typical_bake_default": "KEEP_EDITABLE",
+      "cost_profile": "LOW"
+    },
+    "HYBRID": {
+      "name": "混合路由（多 Producer 分层）",
+      "suitable_scenes": [
+        "写实环境 + 精确 UI 叠加（如真实街道 + 精确角标）",
+        "AI 背景 + Remotion Overlay + 3D 产品的组合",
+        "跨技术 Layer 组合，单一 Route 无法独立满足",
+        "生成式提供环境 + 程序化保证文字 / 数据准确性"
+      ],
+      "core_features": [
+        "强制 Layer Decomposition（§22），每层独立 Producer 与 Route",
+        "文字 / 数据层走 REMOTION / JY_NATIVE 保证准确性",
+        "环境层走 GENERATIVE_VIDEO / REAL_FOOTAGE / THREE_D 保证真实感",
+        "最终在装配后端（JIANYING / REMOTION）合成"
+      ],
+      "forbidden_scenes": [
+        "单一 Route 即可满足的镜头（避免过度拆分）",
+        "无跨 Route 需求时强行分层"
+      ],
+      "typical_bake_default": "KEEP_EDITABLE",
+      "cost_profile": "MEDIUM"
+    }
+  }
+}

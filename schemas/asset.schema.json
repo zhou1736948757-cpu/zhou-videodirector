@@ -1,0 +1,538 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/asset.schema.json",
+  "title": "asset",
+  "description": "素材/资产：生产或采购的视频、音频、图片、3D 等资源的元数据契约（Phase-1 Prompt §25 / 总设计 §32；Phase-6 Prompt §43/§46-49/§62/§68/§83-84/§92-99/§103 增补外部视觉资产字段，仅增可选字段与枚举值，既有 required 与字段原样保留）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asset_id",
+    "name",
+    "type",
+    "purpose",
+    "source",
+    "local_path",
+    "format",
+    "duration",
+    "alpha",
+    "version",
+    "license",
+    "license_url",
+    "attribution_required",
+    "commercial_use",
+    "preview",
+    "cached",
+    "replaceable",
+    "timeline_usage",
+    "created_at",
+    "modified_at",
+    "status"
+  ],
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "pattern": "^A\\d{3}$",
+      "description": "资产 ID，格式 A###。"
+    },
+    "name": {
+      "type": "string",
+      "description": "资产名称。"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "FULL_SCENE",
+        "MOTION_CLIP",
+        "TRANSPARENT_OVERLAY",
+        "ANIMATED_TEXT",
+        "3D_ELEMENT",
+        "BACKGROUND",
+        "PARTICLE_LAYER",
+        "TRANSITION_ASSET",
+        "INFOGRAPHIC",
+        "UI_COMPONENT",
+        "DECORATIVE_ELEMENT",
+        "FOOTAGE",
+        "GENERATIVE_VIDEO",
+        "IMAGE",
+        "MUSIC",
+        "SFX",
+        "VOICEOVER",
+        "AMBIENCE",
+        "SOUNDFONT"
+      ],
+      "description": "资产类型。"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "用途。"
+    },
+    "producer": {
+      "type": "string",
+      "enum": [
+        "REMOTION",
+        "THREE_D",
+        "SOUND",
+        "FLUIDSYNTH",
+        "LIBRARY_MUSIC",
+        "EXTERNAL_VISUAL",
+        "GENERATIVE_VIDEO",
+        "FOOTAGE_PROVIDER",
+        "USER"
+      ],
+      "description": "生产者（Phase-5 Production Engine 枚举 + Phase-6 追加）：REMOTION=Motion Engine；THREE_D=3D Engine；SOUND=Sound Engine（SFX/环境音）；FLUIDSYNTH=Procedural Music（MIDI→WAV）；LIBRARY_MUSIC=库音乐采购；EXTERNAL_VISUAL=外部视觉管线（Phase-6 External Visual Asset Pipeline，§4）；GENERATIVE_VIDEO=AI 视频生成；FOOTAGE_PROVIDER=素材库 Provider 获取；USER=用户提供。"
+    },
+    "source": {
+      "type": "string",
+      "description": "来源（URL/路径）。"
+    },
+    "local_path": {
+      "type": "string",
+      "description": "本地路径。"
+    },
+    "format": {
+      "type": "string",
+      "description": "文件格式，如 mov / mp3 / glb。"
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "w",
+        "h"
+      ],
+      "properties": {
+        "w": {
+          "type": "integer",
+          "description": "宽度（像素）。"
+        },
+        "h": {
+          "type": "integer",
+          "description": "高度（像素）。"
+        }
+      },
+      "description": "分辨率（可选）。"
+    },
+    "fps": {
+      "type": "number",
+      "description": "帧率（可选）。"
+    },
+    "duration": {
+      "type": "number",
+      "description": "时长（秒）。"
+    },
+    "alpha": {
+      "type": "boolean",
+      "description": "是否带透明通道。"
+    },
+    "version": {
+      "type": "string",
+      "description": "版本号。"
+    },
+    "license": {
+      "type": "string",
+      "description": "许可证。"
+    },
+    "license_url": {
+      "type": "string",
+      "description": "许可证链接。"
+    },
+    "attribution_required": {
+      "type": "boolean",
+      "description": "是否需要署名。"
+    },
+    "commercial_use": {
+      "type": "boolean",
+      "description": "是否允许商用。"
+    },
+    "preview": {
+      "type": "string",
+      "description": "预览地址。"
+    },
+    "cached": {
+      "type": "boolean",
+      "description": "是否已缓存。"
+    },
+    "replaceable": {
+      "type": "boolean",
+      "description": "是否可替换。"
+    },
+    "timeline_usage": {
+      "type": "string",
+      "description": "时间线使用说明。"
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^PR-\\d{3}$",
+      "description": "生产请求 ID（可选）：回链 production-request.request_id（PR-###），说明本资产由哪条请求产出。"
+    },
+    "editability": {
+      "type": "string",
+      "enum": [
+        "KEEP_EDITABLE",
+        "ASSET_REPLACEABLE",
+        "BAKE"
+      ],
+      "description": "可编辑性（可选，3 枚举）：KEEP_EDITABLE=时间线内可调；ASSET_REPLACEABLE=内部烘焙但 Asset 可整体替换；BAKE=整体渲染不可拆。"
+    },
+    "reuse_mode": {
+      "type": "string",
+      "enum": [
+        "USE_AS_IS",
+        "ADAPT",
+        "COMPOSE",
+        "BUILD_NEW"
+      ],
+      "description": "复用模式（可选，4 枚举）：USE_AS_IS=直接复用 Registry 资源；ADAPT=适配后复用；COMPOSE=组合多个资源；BUILD_NEW=自建（必须记 build_reason）。"
+    },
+    "registry_resources": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+:[a-z0-9_-]+:[a-z0-9._-]+$"
+      },
+      "description": "引用的 Registry 资源（可选）：resource_id（{provider}:{type}:{slug}），回链 resource-selection（§85-86）。"
+    },
+    "preview_path": {
+      "type": "string",
+      "description": "预览文件路径（可选）：Preview First 产出的低清预览（如 A018_preview.mp4），与正式文件分离（§89-91）。"
+    },
+    "build_reason": {
+      "type": "string",
+      "description": "自建理由（可选）：reuse_mode=BUILD_NEW 时必填，说明 why existing failed（哪些候选、为何不行），禁止无理由自建（§80-82）。"
+    },
+    "timeline_hint": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preferred_start": {
+          "type": "number",
+          "description": "建议起始时间（秒），非硬编码，供 Phase 7 装配参考（§115-116）。"
+        },
+        "preferred_duration": {
+          "type": "number",
+          "minimum": 0,
+          "description": "建议时长（秒），非硬编码。"
+        },
+        "track_hint": {
+          "type": "string",
+          "description": "建议轨道（如 video / overlay / text / sfx / music）。"
+        },
+        "track": {
+          "type": "string",
+          "description": "建议轨道（复用 track_hint 语义，Phase-6 追加，§72/§133）。"
+        },
+        "in_point": {
+          "type": "string",
+          "description": "源素材入点（时间码，如 00:00:16.100，Phase-6 追加，§72 可用区间）。"
+        },
+        "out_point": {
+          "type": "string",
+          "description": "源素材出点（时间码，Phase-6 追加）。"
+        },
+        "crop": {
+          "type": "string",
+          "description": "建议裁剪（Phase-6 追加，§72/§75）。"
+        },
+        "speed": {
+          "type": "string",
+          "description": "建议变速（Phase-6 追加，§72）。"
+        },
+        "overlay_safe_area": {
+          "type": "string",
+          "description": "叠加安全区提示（Phase-6 追加，§72/§133）。"
+        },
+        "blend_hint": {
+          "type": "string",
+          "description": "建议混合方式（如 normal / screen / multiply）。"
+        },
+        "audio_sync_point": {
+          "type": "string",
+          "description": "建议音频同步点（时间码或 beat 引用，如 '00:00:01.200' / 'beat 4'）。"
+        }
+      },
+      "description": "时间线提示（可选）：引擎产出的非硬编码装配建议；引擎不写时间线（§88），此字段只提示，装配与裁决留给 Phase 7。"
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "GENERATED",
+        "REAL_FOOTAGE",
+        "USER_PROVIDED"
+      ],
+      "description": "来源性质（可选，§98 3 枚举）：GENERATED=AI 生成；REAL_FOOTAGE=真实实拍/素材；USER_PROVIDED=用户提供。"
+    },
+    "ownership": {
+      "type": "string",
+      "enum": [
+        "USER_PROVIDED",
+        "PROJECT",
+        "PURCHASED",
+        "LICENSED",
+        "PUBLIC_DOMAIN",
+        "UNKNOWN"
+      ],
+      "description": "所有权（可选，§68 6 枚举）：USER_PROVIDED=用户自有；PROJECT=项目自产；PURCHASED=付费购买；LICENSED=授权使用；PUBLIC_DOMAIN=公有领域；UNKNOWN=未知（不得当 Commercial Safe）。"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "API_GENERATED",
+        "WEB_GENERATED",
+        "USER_UPLOAD",
+        "EXTERNAL_TOOL",
+        "FOOTAGE_DOWNLOAD"
+      ],
+      "description": "来源方式（可选，§43 5 枚举）：API_GENERATED=API 自动生成；WEB_GENERATED=网页端生成；USER_UPLOAD=用户上传；EXTERNAL_TOOL=外部工具产出；FOOTAGE_DOWNLOAD=素材下载。"
+    },
+    "provider": {
+      "type": "string",
+      "description": "来源 Provider（可选，§43；未知可不填，model 未知写 UNKNOWN）。"
+    },
+    "model": {
+      "type": "string",
+      "description": "生成模型（可选，§43；未知必须写 UNKNOWN，不要猜）。"
+    },
+    "prompt_packet_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^GV-\\d{3}$",
+      "description": "生产包引用（可选，§43；格式 GV-###，可空=非生成类资产）。"
+    },
+    "variant_id": {
+      "type": "string",
+      "description": "变体 ID（可选，§92，如 variant-01）。"
+    },
+    "selected_variant": {
+      "type": "string",
+      "description": "最终选中的变体（可选，§92，如 02）。"
+    },
+    "rejected_variants": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "variant_id",
+          "reason",
+          "metadata_kept"
+        ],
+        "properties": {
+          "variant_id": {
+            "type": "string",
+            "description": "被拒变体 ID。"
+          },
+          "reason": {
+            "type": "string",
+            "description": "拒绝理由。"
+          },
+          "metadata_kept": {
+            "type": "boolean",
+            "description": "是否保留元数据（payload 是否保留取决于 storage_policy，§93）。"
+          }
+        }
+      },
+      "description": "被拒变体清单（可选，§93）：不必永久保留所有超大文件，但至少保留元数据与拒绝理由。"
+    },
+    "generation_date": {
+      "type": "string",
+      "description": "生成/收录日期（可选，§43，ISO 8601）。"
+    },
+    "checksum": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "文件 sha256 校验和（可选，§43）。"
+    },
+    "media_probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "duration": {
+          "type": "number",
+          "description": "时长（秒，§48/§69）。"
+        },
+        "resolution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "w",
+            "h"
+          ],
+          "properties": {
+            "w": {
+              "type": "integer",
+              "description": "宽度（像素）。"
+            },
+            "h": {
+              "type": "integer",
+              "description": "高度（像素）。"
+            }
+          },
+          "description": "分辨率（像素）。"
+        },
+        "fps": {
+          "type": "number",
+          "description": "帧率。"
+        },
+        "codec": {
+          "type": "string",
+          "description": "编码（如 h264 / prores）。"
+        },
+        "bitrate": {
+          "type": "number",
+          "description": "码率（bps）。"
+        },
+        "audio_streams": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "音频流数量。"
+        },
+        "aspect_ratio": {
+          "type": "string",
+          "description": "画幅比。"
+        },
+        "rotation": {
+          "type": "number",
+          "description": "旋转角（度）。"
+        },
+        "color_space": {
+          "type": "string",
+          "description": "色彩空间（§48）。"
+        },
+        "transfer": {
+          "type": "string",
+          "description": "传输函数。"
+        },
+        "gamma": {
+          "type": "string",
+          "description": "Gamma。"
+        },
+        "hdr": {
+          "type": "boolean",
+          "description": "是否 HDR。"
+        },
+        "source_look": {
+          "type": "string",
+          "description": "源片观感（§48，如果可检测）。"
+        }
+      },
+      "description": "媒体探测结果（可选，§48/§69）：技术参数档案（duration/resolution/fps/codec/bitrate/audio/aspect/rotation/color metadata），供 Normalization 决策。"
+    },
+    "audio_behavior": {
+      "type": "string",
+      "enum": [
+        "KEEP",
+        "MUTE",
+        "USE_AS_AMBIENCE",
+        "EXTRACT",
+        "REPLACE"
+      ],
+      "description": "音频行为（可选，§83-84 5 枚举）：KEEP=保留；MUTE=静音；USE_AS_AMBIENCE=作环境音；EXTRACT=提取单独使用；REPLACE=替换（不能默认使用自带音频）。"
+    },
+    "acceptance_status": {
+      "type": "string",
+      "enum": [
+        "CANDIDATE",
+        "SELECTED",
+        "APPROVED",
+        "REJECTED",
+        "REVISION_REQUIRED",
+        "NORMALIZED",
+        "READY_FOR_TIMELINE"
+      ],
+      "description": "验收状态（可选，§103 7 枚举）：CANDIDATE=候选；SELECTED=已选中；APPROVED=已批准；REJECTED=已拒绝；REVISION_REQUIRED=需修改；NORMALIZED=已标准化；READY_FOR_TIMELINE=可进时间线（须 QA+License+provenance 全过，§104）。"
+    },
+    "review_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^RV-\\d{3}$",
+      "description": "评审引用（可选，§35-38；格式 RV-###，可空=未评审）。"
+    },
+    "provenance_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^PV-\\d{3}$",
+      "description": "来源引用（可选，§96；格式 PV-###，可空=无溯源记录）。"
+    },
+    "storage_policy": {
+      "type": "string",
+      "enum": [
+        "KEEP_ALL",
+        "KEEP_SELECTED",
+        "KEEP_SELECTED_AND_PREVIEWS",
+        "CUSTOM"
+      ],
+      "description": "存储策略（可选，§94 4 枚举，默认建议 KEEP_SELECTED_AND_PREVIEWS §95，不强制）。"
+    },
+    "proxy_path": {
+      "type": "string",
+      "description": "代理文件路径（可选，§46：大型素材生成低清 proxy 供 Preview，原片保留）。"
+    },
+    "proxy_resolution": {
+      "type": "string",
+      "description": "代理分辨率（可选，如 1080p H.264，§46）。"
+    },
+    "original_path": {
+      "type": "string",
+      "description": "原始文件路径（可选，§47 Original Preservation：Normalize 后不得删除原片）。"
+    },
+    "content_credentials": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signed",
+        "authority",
+        "note"
+      ],
+      "properties": {
+        "signed": {
+          "type": "boolean",
+          "description": "是否有 C2PA 签名（§99 预留 Metadata Slot，Phase 6 恒为 false）。"
+        },
+        "authority": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "签发机构（未签名为 null）。"
+        },
+        "note": {
+          "type": "string",
+          "description": "备注。"
+        }
+      },
+      "description": "内容凭据（可选，§99）：仅 metadata slot，Phase 6 不实现完整 C2PA。"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "创建时间（ISO 8601）。"
+    },
+    "modified_at": {
+      "type": "string",
+      "description": "修改时间（ISO 8601）。"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "waiting_user",
+        "approved",
+        "completed",
+        "skipped",
+        "blocked",
+        "failed",
+        "superseded"
+      ],
+      "description": "资产状态。"
+    }
+  }
+}

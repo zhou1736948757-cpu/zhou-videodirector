@@ -1,0 +1,280 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/continuity-profile.schema.json",
+  "title": "continuity_profile",
+  "description": "连续性与复用档案：跨 Generative Video / Footage Shot 保持一致的复用契约（Phase-6 Prompt §85-87 / §123-127）。类似 Phase 5 Motion Family：禁止每个 AI Shot 独立发明视觉语言。kind 区分 5 类档案——角色档案（CHARACTER_CONTINUITY_PROFILE，§86）、环境档案（ENVIRONMENT_PROFILE，§87）、视觉家族（VISUAL_FAMILY，§85）、场景包（GENERATIVE_SCENE_PACK，§123-124）、参考帧库（REFERENCE_FRAME_BANK，§125-127 只存 approved 帧 §126）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "profile_id",
+    "kind"
+  ],
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "pattern": "^(CP-CHAR-|CP-ENV-|VF-|SP-|RFB-)\\d{3}$",
+      "description": "档案 ID：角色=CP-CHAR-###；环境=CP-ENV-###；视觉家族=VF-###；场景包=SP-###；参考帧库=RFB-###（Phase 6 ID 总表见 work/p6-01/SCHEMA_CONTRACT.md，FR-014/FR-024）。"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "CHARACTER_PROFILE",
+        "ENVIRONMENT_PROFILE",
+        "VISUAL_FAMILY",
+        "SCENE_PACK",
+        "REFERENCE_FRAME_BANK"
+      ],
+      "description": "档案类别（5 枚举）：CHARACTER_PROFILE=角色连续性档案；ENVIRONMENT_PROFILE=环境档案；VISUAL_FAMILY=视觉家族；SCENE_PACK=场景包；REFERENCE_FRAME_BANK=参考帧库。"
+    },
+    "character": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "角色名（可选，§86；对齐 continuity.py create_character_profile 输出，FR-017）。"
+        },
+        "appearance": {
+          "type": "string",
+          "description": "外貌（§86）。"
+        },
+        "hair": {
+          "type": "string",
+          "description": "发型/发色。"
+        },
+        "clothing": {
+          "type": "string",
+          "description": "服装。"
+        },
+        "age": {
+          "type": "string",
+          "description": "年龄范围。"
+        },
+        "body_type": {
+          "type": "string",
+          "description": "体型。"
+        },
+        "accessories": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "string"
+          },
+          "description": "配饰清单。"
+        },
+        "color_palette": {
+          "type": "string",
+          "description": "角色色板。"
+        },
+        "reference_assets": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "string",
+            "pattern": "^A\\d{3}$"
+          },
+          "description": "参考资产（A###，character_reference / 角色参考图）。"
+        }
+      },
+      "description": "角色档案（kind=CHARACTER_PROFILE 时填写，§86）。"
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "architecture": {
+          "type": "string",
+          "description": "建筑/结构（§87）。"
+        },
+        "materials": {
+          "type": "string",
+          "description": "材质。"
+        },
+        "lighting": {
+          "type": "string",
+          "description": "灯光基准。"
+        },
+        "time": {
+          "type": "string",
+          "description": "时段基准。"
+        },
+        "layout": {
+          "type": "string",
+          "description": "空间布局。"
+        },
+        "signature_objects": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "string"
+          },
+          "description": "标志性物件。"
+        },
+        "reference_frames": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "string",
+            "pattern": "^RF-\\d{3}$"
+          },
+          "description": "参考帧（RF-###，引用 Reference Frame Bank 条目）。"
+        }
+      },
+      "description": "环境档案（kind=ENVIRONMENT_PROFILE 时填写，§87；同一地点复用环境档案，§122 AI Environment Reuse）。"
+    },
+    "visual_family": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "type": "string",
+          "description": "色彩语言（§85）。"
+        },
+        "lighting": {
+          "type": "string",
+          "description": "灯光语言。"
+        },
+        "camera": {
+          "type": "string",
+          "description": "相机语言。"
+        },
+        "environment": {
+          "type": "string",
+          "description": "环境语言（可引用环境档案 ID）。"
+        },
+        "character": {
+          "type": "string",
+          "description": "角色语言（可引用角色档案 ID）。"
+        },
+        "style_reference": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "string"
+          },
+          "description": "风格参考（array of strings，§85）：引用 VISUAL_BIBLE 风格标签/参考图（引擎 create_visual_family 输出 list，语义为多个风格参考）。"
+        }
+      },
+      "description": "视觉家族（kind=VISUAL_FAMILY 时填写，§85）：多个 AI Video Shot 共享的统一视觉语言。"
+    },
+    "scene_pack": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "场景包名称（可选，§123；引擎 create_scene_pack 输出 name 键）。"
+        },
+        "environment_profile_ref": {
+          "type": "string",
+          "pattern": "^CP-ENV-\\d{3}$",
+          "description": "环境档案引用（CP-ENV-###，共享 Environment Profile）。"
+        },
+        "lighting": {
+          "type": "string",
+          "description": "场景包共享灯光（§123）。"
+        },
+        "style": {
+          "type": "string",
+          "description": "场景包共享风格。"
+        },
+        "shots": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "shot_id",
+              "type"
+            ],
+            "properties": {
+              "shot_id": {
+                "type": "string",
+                "description": "场景包内镜头 ID（如 S###A / S###B）。"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ESTABLISHING",
+                  "MEDIUM",
+                  "DETAIL",
+                  "TRANSITION"
+                ],
+                "description": "镜头类型（4 枚举，§123）：ESTABLISHING=定场；MEDIUM=中景；DETAIL=细节；TRANSITION=转场。"
+              }
+            }
+          },
+          "description": "场景包镜头清单（同一环境共享 Profile/Lighting/Style，提高 continuity 与 generation efficiency §124）。"
+        }
+      },
+      "description": "场景包（kind=SCENE_PACK 时填写，§123 GENERATIVE_SCENE_PACK）。"
+    },
+    "reference_frame_bank": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bank_id",
+        "frames"
+      ],
+      "properties": {
+        "bank_id": {
+          "type": "string",
+          "pattern": "^RFB-\\d{3}$",
+          "description": "参考帧库容器 ID，格式 RFB-###（§125-127，与顶层 profile_id 同值）。"
+        },
+        "frames": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "frame_id",
+              "asset_ref",
+              "variant_id",
+              "kind",
+              "purpose"
+            ],
+            "properties": {
+              "frame_id": {
+                "type": "string",
+                "pattern": "^RF-\\d{3}$",
+                "description": "参考帧 ID，格式 RF-###（§125-127）。"
+              },
+              "asset_ref": {
+                "type": "string",
+                "pattern": "^A\\d{3}$",
+                "description": "来源资产（A###）。"
+              },
+              "variant_id": {
+                "type": "string",
+                "description": "来源变体（如 variant-01，§92）。"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "HERO",
+                  "START",
+                  "END",
+                  "CONTINUITY"
+                ],
+                "description": "参考帧类别（4 枚举，§127 Frame Extraction）：HERO=英雄帧；START=起始帧；END=结束帧；CONTINUITY=连续性帧。"
+              },
+              "purpose": {
+                "type": "string",
+                "description": "用途（后续同场景生成时的锚点）。"
+              }
+            }
+          },
+          "description": "参考帧条目（§125-127）：只保存有用且 approved 的参考帧，禁止无限积累（§126）。"
+        }
+      },
+      "description": "参考帧库（kind=REFERENCE_FRAME_BANK 时填写，§125-127）：嵌套结构 {bank_id: RFB-###, frames: [...]}（对齐 continuity.py 实际输出，FR-015）。迁移说明：P6-01 首版曾把 frames 直接平铺在档案顶层，现改为 reference_frame_bank.frames 嵌套承载，顶层 frames 键已移除。"
+    },
+    "continuity_note": {
+      "type": "string",
+      "description": "连续性说明（可选，§85-87/§125-127）：档案共享/复用意图的补充说明（对齐 continuity.py 输出，FR-016）。"
+    }
+  }
+}

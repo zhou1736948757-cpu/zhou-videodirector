@@ -1,0 +1,50 @@
+{
+  "id": "SC001",
+  "chapter": "Ch1: ...",
+  "order": 1,
+  "title": "...",
+  "narrative_role": "Hook|Setup|Development|Reveal|Payoff|Recap|Closing|...",
+  "purpose": "...",
+  "target_duration": 5.0,
+  "shots": [
+    { "shot_id": "S001", "order": 1 }
+  ],
+  "visual_direction": {
+    "summary": "...",
+    "intensity": "high|medium|low",
+    "tempo": "fast|moderate|slow"
+  },
+  "audio_direction": {
+    "summary": "...",
+    "music_cue": "...",
+    "ambience": "..."
+  },
+  "approval": {
+    "approval_id": "AP-001",
+    "status": "pending"
+  },
+  "status": "not_started",
+  "notes": "",
+  "_fill_guide": {
+    "说明": "本文件是 templates/scene.scene.json（Phase-2 §56）——与 schemas/scene.schema.json 对齐的 JSON skeleton。使用前把本 _fill_guide 键整块删除；正式实例落地到 <project>/scenes/SC###.json。",
+    "id": "必填，string，格式 SC###（正则 ^SC\\d{3}$），全片唯一。",
+    "chapter": "必填，string，所属章节，如 'Ch1: AI 为什么需要记忆'（引用 STORY_BEAT_MAP 的 Chapter）。",
+    "order": "必填，integer，场景出场顺序（1,2,3…）。",
+    "title": "必填，string，场景标题，一行可读摘要。",
+    "narrative_role": "必填，string，叙事角色：Hook|Setup|Development|Reveal|Payoff|Recap|Closing|Transition|Climax|...；写实际取值，不要写枚举列。",
+    "purpose": "必填，string，一句话场景目标：观众看完本场景要理解/感受到什么（对齐 CREATIVE_DIRECTION 的 Viewer Tension）。",
+    "target_duration": "必填，number（秒）。硬约束：= Σ shots[].duration（允许 ±5%，偏差须在 notes 说明）。",
+    "shots": "必填，array。每个元素 {shot_id, order}，引用 shots/S###.json 的 id（shot_id 正则 ^S\\d{3}$）；order 为场景内顺序，与 shot.order 一致。",
+    "visual_direction.summary": "场景视觉方向一句话摘要（对齐 VISUAL_BIBLE）。scene.schema.json 中 visual_direction 允许 string 与结构化对象两种写法（oneOf），本模板采用对象写法；对象内部字段不限（additionalProperties 放行），string 写法同样允许（如 'summary: ...; intensity: low; tempo: slow'）。",
+    "visual_direction.intensity": "视觉强度意向：high|medium|low（与 Hero Effect 密度相关，见 §64）。",
+    "visual_direction.tempo": "节奏意向：fast|moderate|slow（对齐 STORY_BEAT_MAP 的 Pacing）。",
+    "audio_direction.summary": "场景音频方向摘要（对齐 AUDIO_DIRECTION）。同 visual_direction：schema 中 audio_direction 允许 string 与对象两种写法（oneOf），本模板为对象写法，string 写法同样允许。",
+    "audio_direction.music_cue": "音乐 cue 描述：进入/离开/变奏点（如 '00:18 主题进入'）。",
+    "audio_direction.ambience": "环境声方向（如 '房间底噪 -20dB' / '低频脉冲'）。",
+    "approval.approval_id": "必填，string，格式 AP-###，引用 <project>/approvals.yaml 或 approval 记录（storyboard 场景级审批，scope 可写 scene:SC001）。",
+    "approval.status": "必填，枚举：pending|approved|rejected|revision_requested|superseded。",
+    "status": "必填，场景状态枚举（not_started|in_progress|waiting_user|approved|completed|skipped|blocked|failed|superseded）；STORYBOARD 阶段通常 not_started，提交审批时 waiting_user。",
+    "notes": "必填，string。可记录：时长偏差原因、场景级约束、用户反馈摘要。",
+    "契约": "ID 全部 SC###/S###/AP-###；scene.shots[].shot_id 必须存在于 shots/ 下且与 shot.id 一致（validator check_11 会校验）。"
+  }
+}

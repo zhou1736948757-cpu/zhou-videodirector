@@ -1,0 +1,333 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/shot.schema.json",
+  "title": "shot",
+  "description": "镜头：一个连续编辑单元，包含叙事、视觉、运动、相机、音频、路由与审批信息（Phase-1 Prompt §23 + §27）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "scene_id",
+    "order",
+    "duration",
+    "start_time",
+    "end_time",
+    "narrative_purpose",
+    "voiceover",
+    "on_screen_text",
+    "visual_description",
+    "camera",
+    "motion",
+    "audio",
+    "transition_in",
+    "transition_out",
+    "layers",
+    "route",
+    "continuity_group",
+    "assets",
+    "dependencies",
+    "approval",
+    "implementation_status",
+    "qa_status",
+    "notes"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^S\\d{3}$",
+      "description": "镜头 ID，格式 S###。"
+    },
+    "scene_id": {
+      "type": "string",
+      "pattern": "^SC\\d{3}$",
+      "description": "所属场景 ID，格式 SC###，引用 scene.id。"
+    },
+    "order": {
+      "type": "integer",
+      "description": "镜头顺序。"
+    },
+    "duration": {
+      "type": "number",
+      "description": "镜头时长（秒）。"
+    },
+    "start_time": {
+      "type": "number",
+      "description": "开始时间（秒）。"
+    },
+    "end_time": {
+      "type": "number",
+      "description": "结束时间（秒）。"
+    },
+    "narrative_purpose": {
+      "type": "string",
+      "description": "叙事目的。"
+    },
+    "voiceover": {
+      "type": "string",
+      "description": "旁白文案。"
+    },
+    "on_screen_text": {
+      "type": "string",
+      "description": "屏幕文字。"
+    },
+    "visual_description": {
+      "type": "string",
+      "description": "视觉描述。"
+    },
+    "camera": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "相机/运镜的文本说明。"
+        },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "相机/运镜的结构化对象写法（如 movement / framing）。"
+        }
+      ],
+      "description": "相机/运镜说明（string 或结构化对象均允许）。"
+    },
+    "motion": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "动效的文本说明。"
+        },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "动效的结构化对象写法（如 character / intensity）。"
+        }
+      ],
+      "description": "动效说明（string 或结构化对象均允许）。"
+    },
+    "audio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "music",
+        "sfx",
+        "ambience",
+        "sync_points",
+        "voiceover",
+        "notes"
+      ],
+      "properties": {
+        "music": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "cue",
+            "action"
+          ],
+          "properties": {
+            "mode": {
+              "type": "string",
+              "description": "音乐模式。"
+            },
+            "cue": {
+              "type": "string",
+              "description": "音乐提示点。"
+            },
+            "action": {
+              "type": "string",
+              "description": "音乐动作。"
+            }
+          }
+        },
+        "sfx": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "音效清单。"
+        },
+        "ambience": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "环境声清单。"
+        },
+        "sync_points": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "同步点清单。"
+        },
+        "voiceover": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "present",
+            "ducking"
+          ],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "是否有旁白。"
+            },
+            "ducking": {
+              "type": "string",
+              "description": "旁白闪避策略。"
+            }
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "音频备注。"
+        }
+      },
+      "description": "镜头音频子结构（Phase-1 Prompt §27）。"
+    },
+    "transition_in": {
+      "type": "string",
+      "description": "入场转场。"
+    },
+    "transition_out": {
+      "type": "string",
+      "description": "出场转场。"
+    },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "layer_id",
+          "z_order"
+        ],
+        "properties": {
+          "layer_id": {
+            "type": "string",
+            "pattern": "^L\\d{3}$",
+            "description": "图层 ID，格式 L###，引用 layer.id。"
+          },
+          "z_order": {
+            "type": "integer",
+            "description": "图层层级顺序。"
+          }
+        }
+      },
+      "description": "镜头内图层引用列表。"
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "REMOTION",
+        "THREE_D",
+        "REAL_FOOTAGE",
+        "GENERATIVE_VIDEO",
+        "JY_NATIVE",
+        "HYBRID",
+        "UNDECIDED"
+      ],
+      "description": "镜头技术路由。"
+    },
+    "continuity_group": {
+      "type": "string",
+      "description": "运动连续性分组。"
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "asset_id",
+          "slot"
+        ],
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "pattern": "^A\\d{3}$",
+            "description": "资产 ID，格式 A###，引用 asset.asset_id。"
+          },
+          "slot": {
+            "type": "string",
+            "description": "资产在镜头中的槽位。"
+          }
+        }
+      },
+      "description": "镜头使用资产引用列表。"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "target_id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "依赖类型。"
+          },
+          "target_id": {
+            "type": "string",
+            "description": "依赖目标 ID。"
+          }
+        }
+      },
+      "description": "镜头依赖列表。"
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approval_id",
+        "status"
+      ],
+      "properties": {
+        "approval_id": {
+          "type": "string",
+          "pattern": "^AP-\\d{3}$",
+          "description": "审批 ID，格式 AP-###，引用 approval.approval_id。"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved",
+            "rejected",
+            "revision_requested",
+            "superseded"
+          ],
+          "description": "审批状态。"
+        }
+      },
+      "description": "镜头审批引用。"
+    },
+    "implementation_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "blocked",
+        "completed",
+        "failed"
+      ],
+      "description": "实现状态。"
+    },
+    "qa_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "passed",
+        "failed",
+        "blocked"
+      ],
+      "description": "QA 状态。"
+    },
+    "notes": {
+      "type": "string",
+      "description": "备注。"
+    }
+  }
+}

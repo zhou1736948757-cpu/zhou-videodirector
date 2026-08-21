@@ -1,0 +1,1801 @@
+# routing-cases.yaml — Phase-3 Shot / Layer Router Benchmark Fixture (P3-5)
+#
+# 来源：Phase-3 Prompt §75（Test 1-15 案例）、§76（Stress Test 类别覆盖清单）、
+#       §77（Benchmark case 格式）、§78（acceptable alternatives / 避开明显错误优先）。
+#
+# 共享契约：
+#   Route 枚举     : REMOTION | THREE_D | REAL_FOOTAGE | GENERATIVE_VIDEO | JY_NATIVE | HYBRID
+#   12 项因子      : 0.0-1.0（factors 只列关键项；缺失项在文档层默认 0.2，引擎另行从 shot 文本推导）
+#   Confidence     : >=0.80 HIGH / 0.55-0.79 MEDIUM / <0.55 LOW
+#
+# 判定口径（与 scripts/routing-benchmark.py 一致，§78）：
+#   pass      : 引擎 route ∈ expected_routes ∪ acceptable_alternatives，且 ∉ must_not_route
+#   soft_pass : route ∈ acceptable_alternatives 但 ∉ expected_routes（备选命中，记为警告）
+#   fail      : route ∈ must_not_route（严重）或 ∉ expected ∪ acceptable（偏离）
+#   must_not 规避率：引擎 route ∉ must_not_route 的 case 占比（§78：重点是避开明显错误）
+#
+# 可选字段（不影响路由判定，仅作为附加检查信息）：
+#   expect_confidence_max / expect_confidence_min / expect_prototype_required / expect_route_source
+#
+# 类别覆盖（§76）：ui / human / street / nature / map / chart / product / 3D / archive /
+#   documentary / paper-cut / ai_dream / data_viz / logo / subtitle / photo / social /
+#   cinematic / particles / interface / diagram
+schema_version: 1
+route_enum: [REMOTION, THREE_D, REAL_FOOTAGE, GENERATIVE_VIDEO, JY_NATIVE, HYBRID]
+
+cases:
+  # =========================================================================
+  # REMOTION 类（约 20%）—— 结构化 / 文字 / 数据 / 时序驱动
+  # =========================================================================
+  - id: ROUTE-001
+    test_ref: Test 1
+    category: ui
+    description: Basic AI dashboard with cards, numbers and labels.
+    factors:
+      structural_precision: 0.9
+      text_accuracy: 1.0
+      data_accuracy: 1.0
+      timing_precision: 1.0
+      editability_requirement: 0.8
+    shot:
+      id: S001
+      on_screen_text: "Q3 REVENUE $1.2M / GROWTH 34%"
+      visual_description: "AI dashboard with metric cards, bar charts and a grid layout, dark background, precise alignment"
+      camera: static
+      motion: "cards stagger in with spring, numbers tick up in sync with beats"
+      audio: {sync_points: ["00:03 number tick"], sfx: ["tick"], voiceover: {present: false}}
+      notes: "Layer Intent: BG: dark; UI: cards; DATA: numbers; Editability: HIGH"
+      visual_direction: {intent: "UI dashboard", editability: HIGH, reason: "metrics change every release"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, REAL_FOOTAGE]
+    reason: "UI 卡片 / 数字 / 精确对齐与帧级同步必须程序化产出；生成式无法保证逐字准确。"
+
+  - id: ROUTE-002
+    test_ref: Test 7
+    category: chart
+    description: Animated chart with exact statistics.
+    factors:
+      structural_precision: 0.8
+      text_accuracy: 1.0
+      data_accuracy: 1.0
+      timing_precision: 1.0
+    shot:
+      id: S002
+      on_screen_text: "Q1 42% / Q2 55% / Q3 61%"
+      visual_description: "animated bar chart with exact statistics and labels, grid background, precise layout, numbers count up in sync with voiceover"
+      camera: static
+      motion: "bars grow in sync with beats, numbers tick"
+      audio: {sync_points: ["00:02 bar 1"], sfx: [], voiceover: {present: true}}
+      notes: "Layer Intent: DATA: chart; TYPO: labels; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "chart animation"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "精确统计数据与图表动画要求结构化 Producer；生成式视频不能当数据 Producer（§36）。"
+
+  - id: ROUTE-003
+    test_ref: Test 8
+    category: map
+    description: Animated geography map with exact labels and routes.
+    factors:
+      structural_precision: 0.9
+      text_accuracy: 1.0
+      data_accuracy: 1.0
+    shot:
+      id: S003
+      on_screen_text: "ROUTE 66 / 2,448 mi"
+      visual_description: "animated geography map with exact city labels and route lines, precise layout, timeline of stops, panels"
+      camera: "zoom to region"
+      motion: "route draws in sequence with spring"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: DATA: map route; TYPO: labels; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "map animation"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: [THREE_D]
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "精确地理标签与路径动画属于高结构化内容；3D 亦可承载但非必须（§76 map）。"
+
+  - id: ROUTE-004
+    test_ref: Test 11
+    category: interface
+    description: "Continuous morph: button -> card -> graph -> 3D spatial scene."
+    factors:
+      structural_precision: 1.0
+      text_accuracy: 0.8
+      data_accuracy: 0.5
+      timing_precision: 0.9
+    shot:
+      id: S004
+      continuity_group: CG-MORPH
+      on_screen_text: "MENU / DASHBOARD / TREND"
+      visual_description: "a button expands into a card, then into a graph, then into a 3D spatial data scene, one continuous procedural morph with an exact layout"
+      camera: "spatial camera"
+      motion: "continuous morph, procedural graph, stagger, sync to beat"
+      audio: {sync_points: ["00:01 morph start"], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: graph; UI: cards; DATA: 数字; Likely: remotion; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "continuous morph sequence"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, JY_NATIVE]
+    reason: "连续形态变换（continuity_group）应作为单一 Motion Asset 程序化渲染（§31/§56）；剪映无法承载 morph 编排。"
+
+  - id: ROUTE-005
+    category: typography
+    description: Kinetic typography with exact slogan synced to music beats.
+    factors:
+      text_accuracy: 1.0
+      structural_precision: 0.7
+      timing_precision: 1.0
+    shot:
+      id: S005
+      on_screen_text: "MOVE WITH PRECISION"
+      visual_description: "kinetic typography, words stagger in and sync to music beats, exact slogan, precise typography layout, 对齐 aligned to grid"
+      camera: static
+      motion: "stagger, spring, sync to beat, 逐字 reveal"
+      audio: {sync_points: ["00:01 word 1"], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: TYPO: 逐字文案; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "kinetic type"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "逐字精确排版 + beat 级同步需要帧级控制，Remotion 天然胜任。"
+
+  - id: ROUTE-006
+    category: ui
+    description: Live dashboard with metric cards ticking to beats.
+    factors:
+      structural_precision: 1.0
+      data_accuracy: 1.0
+      timing_precision: 0.9
+    shot:
+      id: S006
+      on_screen_text: "USERS 2.4M / ACTIVE 58%"
+      visual_description: "live dashboard with metric cards, bar charts, grid layout, UI panels, dark background, precise alignment"
+      camera: static
+      motion: "numbers tick up in sync with beats, cards stagger"
+      audio: {sync_points: ["00:01 tick"], sfx: ["tick"], voiceover: {present: false}}
+      notes: "Layer Intent: UI: 看板; DATA: 指标; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "live dashboard"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "看板 UI + 实时指标数字需要精确数据与布局，参数化可编辑。"
+
+  - id: ROUTE-007
+    category: timeline
+    description: Horizontal timeline infographic with milestone nodes.
+    factors:
+      structural_precision: 1.0
+      text_accuracy: 1.0
+      data_accuracy: 1.0
+      timing_precision: 0.9
+    shot:
+      id: S007
+      on_screen_text: "2019 / 2021 / 2023 / 2025"
+      visual_description: "horizontal timeline infographic with milestone nodes in a precise grid layout, exact dates and labels, panels in sequence"
+      camera: static
+      motion: "nodes appear in sequence with spring, sync to beat"
+      audio: {sync_points: ["00:01 node 1"], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: DATA: timeline; TYPO: dates; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "timeline infographic"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "时间轴信息图：精确日期、节点序列与对齐（§17 timeline）。"
+
+  - id: ROUTE-008
+    category: ui
+    description: App onboarding interface flow animation.
+    factors:
+      structural_precision: 1.0
+      text_accuracy: 0.9
+      timing_precision: 0.8
+    shot:
+      id: S008
+      on_screen_text: "GET STARTED / SKIP"
+      visual_description: "app interface onboarding flow, animated cards in a grid layout, precise button labels, UI panels sliding in sequence"
+      camera: static
+      motion: "cards stagger in, UI panels slide, sync to beat"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: UI: 引导页; TYPO: 按钮文案; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "onboarding flow"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "按钮文案与卡片布局必须精确，界面动效程序化最稳。"
+
+  - id: ROUTE-009
+    category: data_viz
+    description: Data visualization line chart with exact numbers.
+    factors:
+      data_accuracy: 1.0
+      structural_precision: 0.8
+      text_accuracy: 0.8
+      timing_precision: 0.9
+    shot:
+      id: S009
+      on_screen_text: "REVENUE $1.2M / $2.1M / $3.8M"
+      visual_description: "data visualization with animated line chart and exact numbers, grid background, labels, precise statistics, numbers tick in sync"
+      camera: static
+      motion: "line draws in sync with beats, numbers tick"
+      audio: {sync_points: ["00:02 tick"], sfx: ["tick"], voiceover: {present: false}}
+      notes: "Layer Intent: DATA: 图表; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "data viz"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "数值精确 + 网格对齐 + 同步绘制，属于结构化数据可视化。"
+
+  - id: ROUTE-010
+    category: particles
+    description: Structured particle network diagram on a grid.
+    factors:
+      structural_precision: 1.0
+      timing_precision: 1.0
+      data_accuracy: 0.5
+    shot:
+      id: S010
+      on_screen_text: ""
+      visual_description: "structured particle network diagram, nodes on an exact grid layout, particles travel along deterministic paths in sync with the beat, precise timing"
+      camera: static
+      motion: "particles travel, stagger, spring"
+      audio: {sync_points: ["00:00 node A"], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: DATA: 粒子图; Likely: remotion; Editability: MEDIUM"
+      visual_direction: {editability: MEDIUM, intent: "particle network"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, JY_NATIVE]
+    reason: "结构化粒子按确定性路径运动并同步节拍，属程序化 motion graphic（§17）。"
+
+  - id: ROUTE-011
+    category: logo
+    description: Kinetic logo reveal with exact brand name letters.
+    factors:
+      text_accuracy: 1.0
+      structural_precision: 0.7
+      timing_precision: 1.0
+    shot:
+      id: S011
+      on_screen_text: "NEXUS"
+      visual_description: "logo reveal with exact brand name letters assembling in precise sequence, kinetic typography, grid alignment, sync to beat"
+      camera: static
+      motion: "letters stagger in, spring, sync to beat"
+      audio: {sync_points: ["00:00 letter 1"], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: TYPO: 品牌名; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "kinetic logo"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "品牌名逐字精确组装 + beat 同步，程序化 logo 动画。"
+
+  - id: ROUTE-012
+    category: ui
+    description: App store page with exact ratings and screenshots.
+    factors:
+      structural_precision: 1.0
+      text_accuracy: 1.0
+      data_accuracy: 0.8
+    shot:
+      id: S012
+      on_screen_text: "PHOTOPRO 4.8 / 12K REVIEWS"
+      visual_description: "app store page with exact product name and rating numbers, precise grid layout, screenshot panels, UI cards"
+      camera: static
+      motion: "panels fade in sequence, numbers count up"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: UI: 应用商店页; TYPO: 评分数字; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "app store page"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "评分数字与界面布局必须精确可编辑。"
+
+  - id: ROUTE-013
+    category: paper_cut
+    description: Paper-cut style layered animation with precise choreography.
+    factors:
+      structural_precision: 1.0
+      timing_precision: 1.0
+      editability_requirement: 0.7
+    shot:
+      id: S013
+      on_screen_text: ""
+      visual_description: "paper-cut style scene, layered paper figures on a precise grid layout, panels in a timeline, exact frame timing, 布局 and 对齐 controlled"
+      camera: static
+      motion: "layers move in sequence with stagger, sync to beat"
+      audio: {sync_points: ["00:00 layer 1"], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 剪纸层; Likely: remotion; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "layered paper motion graphic"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, JY_NATIVE]
+    reason: "剪纸分层逐层同步动画需要帧级控制与可编辑源（§76 paper-cut）。"
+
+  - id: ROUTE-014
+    category: typography
+    description: Title card with exact URL and brand name.
+    factors:
+      text_accuracy: 1.0
+      structural_precision: 0.7
+      timing_precision: 0.8
+    shot:
+      id: S014
+      on_screen_text: "www.example.com/zh"
+      visual_description: "title card with exact URL and brand name, precise typography layout, letters spring in, 对齐 aligned to grid"
+      camera: static
+      motion: "letters spring in, sync to beat"
+      audio: {sync_points: ["00:00 url"], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: TYPO: 网址; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "title card"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "网址字符必须逐字精确，程序化排版。"
+
+  - id: ROUTE-015
+    category: diagram
+    description: Animated circuit board diagram with exact component labels.
+    factors:
+      structural_precision: 1.0
+      text_accuracy: 0.9
+      timing_precision: 0.8
+    shot:
+      id: S015
+      on_screen_text: "CPU / GPU / NPU"
+      visual_description: "animated circuit board diagram with exact component labels, precise grid layout, UI panels, 布局 aligned, circuits light up in sequence"
+      camera: static
+      motion: "circuits light up in sequence with spring, sync to beat"
+      audio: {sync_points: ["00:00 cpu"], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: DATA: 电路图; TYPO: 元件标签; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "circuit diagram animation"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REMOTION]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "电路图 + 精确元件标签 + 顺序点亮，高结构化示意动画。"
+
+  # =========================================================================
+  # THREE_D 类（约 12%）—— 3D 产品 / 爆炸图 / 轨道运镜 / 空间 UI
+  # =========================================================================
+  - id: ROUTE-016
+    test_ref: Test 3
+    category: "3D"
+    description: 3D chip exploded view with orbit camera.
+    factors:
+      physical_complexity: 0.9
+      camera_complexity: 0.7
+      structural_precision: 0.5
+    shot:
+      id: S016
+      on_screen_text: ""
+      visual_description: "3D microchip product model exploded into parts, metallic materials, orbiting camera, physics assembly, 爆炸图"
+      camera: "orbit 360 around the chip, slow push"
+      motion: "exploded parts reassemble with subtle physics"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: CONCEPT: chip; 3D: 爆炸图; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "chip exploded view"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [THREE_D]
+    acceptable_alternatives: []
+    must_not_route: [JY_NATIVE, GENERATIVE_VIDEO]
+    reason: "芯片拆解 + 轨道相机 + 物理组装，3D 管线专属场景（§18/§76 3D）。"
+
+  - id: ROUTE-017
+    category: product
+    description: 3D wireless earbuds rotating on a turntable.
+    factors:
+      physical_complexity: 0.6
+      camera_complexity: 0.7
+      structural_precision: 0.5
+    shot:
+      id: S017
+      on_screen_text: ""
+      visual_description: "3D wireless earbuds product model rotating on a turntable, orbit camera, metallic material, clean studio lighting, precise geometry"
+      camera: "orbit around product"
+      motion: "turntable rotation, slow push"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: 3D: 产品模型; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "3D product turntable"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [THREE_D]
+    acceptable_alternatives: []
+    must_not_route: [JY_NATIVE]
+    reason: "3D 产品环绕展示需要模型 / 材质 / 相机可控。"
+
+  - id: ROUTE-018
+    category: "3D"
+    description: Exploded mechanical watch gear assembly.
+    factors:
+      physical_complexity: 0.9
+      camera_complexity: 0.6
+    shot:
+      id: S018
+      on_screen_text: ""
+      visual_description: "exploded view of a mechanical watch gear assembly, 齿轮 gears and springs separated in space, orbit camera, precise parts, 机械 structure"
+      camera: "orbit 360"
+      motion: "parts separate with physics"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: 3D: 爆炸图; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "watch exploded"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [THREE_D]
+    acceptable_alternatives: []
+    must_not_route: [JY_NATIVE]
+    reason: "机械结构爆炸图 + 轨道镜头，3D 管线。"
+
+  - id: ROUTE-019
+    category: "3D"
+    description: 3D server rack with sliding components.
+    factors:
+      physical_complexity: 0.7
+      camera_complexity: 0.6
+      structural_precision: 0.6
+    shot:
+      id: S019
+      on_screen_text: ""
+      visual_description: "3D server rack with components sliding out, precise geometry, spatial camera move, 机械 mechanical structure, 模型 model"
+      camera: "spatial camera"
+      motion: "components slide out in sequence"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: 3D: 机柜模型; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "server rack"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [THREE_D]
+    acceptable_alternatives: []
+    must_not_route: [JY_NATIVE]
+    reason: "机械结构 + 空间运镜，3D 展示。"
+
+  - id: ROUTE-020
+    category: interface
+    description: Spatial AR interface with holographic panels orbiting.
+    factors:
+      camera_complexity: 0.8
+      structural_precision: 0.6
+      physical_complexity: 0.4
+    shot:
+      id: S020
+      on_screen_text: ""
+      visual_description: "spatial AR interface with holographic panels floating in 3D space, orbit camera around the panels, precise geometry, spatial UI layout"
+      camera: "orbit 360"
+      motion: "panels orbiting, spatial camera move"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: 3D: 空间面板; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "3D spatial UI"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [THREE_D]
+    acceptable_alternatives: [REMOTION]
+    must_not_route: [JY_NATIVE]
+    reason: "空间 UI 与环绕运镜依赖 3D 相机控制；纯 2D 不可承载。"
+
+  - id: ROUTE-021
+    category: "3D"
+    description: 3D crystal with faceted geometry.
+    factors:
+      physical_complexity: 0.7
+      camera_complexity: 0.6
+    shot:
+      id: S021
+      on_screen_text: ""
+      visual_description: "3D crystal formation with precise faceted geometry, crystal rotating, orbit camera, refractive material, physical complexity"
+      camera: "orbit"
+      motion: "slow rotation"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: 3D: 晶体; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "crystal model"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [THREE_D]
+    acceptable_alternatives: []
+    must_not_route: [JY_NATIVE]
+    reason: "几何晶体建模与材质渲染，3D 管线。"
+
+  - id: ROUTE-022
+    category: "3D"
+    description: 2.5D isometric smart home scene.
+    factors:
+      structural_precision: 0.6
+      camera_complexity: 0.6
+      physical_complexity: 0.5
+    shot:
+      id: S022
+      on_screen_text: ""
+      visual_description: "2.5D isometric scene of a smart home, camera orbit around the rooms, precise geometry, 模型 model buildings"
+      camera: "orbit"
+      motion: "rooms glow in sequence"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: 3D: 模型; Likely: 3d; Editability: MEDIUM"
+      visual_direction: {editability: MEDIUM, intent: "2.5D isometric home"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [THREE_D]
+    acceptable_alternatives: []
+    must_not_route: [JY_NATIVE]
+    reason: "2.5D 等距空间 + 环绕运镜，借用 3D 纵深（§18）。"
+
+  - id: ROUTE-023
+    category: product
+    description: 3D smartphone exploded into layers.
+    factors:
+      physical_complexity: 0.8
+      camera_complexity: 0.7
+    shot:
+      id: S023
+      on_screen_text: ""
+      visual_description: "3D smartphone exploded into layers: screen, battery, motherboard, precise parts, orbit camera, 模型 model"
+      camera: "orbit 360"
+      motion: "layers separate with physics"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: 3D: 手机拆解; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "phone exploded"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [THREE_D]
+    acceptable_alternatives: []
+    must_not_route: [JY_NATIVE]
+    reason: "产品拆解动画，3D 模型 / 相机可控。"
+
+  - id: ROUTE-024
+    category: "3D"
+    description: 3D mechanical gear train animation.
+    factors:
+      physical_complexity: 0.9
+      camera_complexity: 0.5
+    shot:
+      id: S024
+      on_screen_text: ""
+      visual_description: "3D mechanical gear train animation, 齿轮 gears interlocking, precise rotation, orbit camera, 机械 mechanism, physics"
+      camera: "orbit"
+      motion: "gears rotating in sync"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: 3D: 齿轮机构; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "gear train"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [THREE_D]
+    acceptable_alternatives: []
+    must_not_route: [JY_NATIVE]
+    reason: "机械齿轮物理咬合动画，3D 管线。"
+
+  - id: ROUTE-025
+    test_ref: Test 14
+    category: "3D"
+    description: "User override: system suggests GENERATIVE_VIDEO, user forces THREE_D."
+    factors:
+      camera_complexity: 0.7
+      physical_complexity: 0.5
+      photorealism: 0.8
+    shot:
+      id: S025
+      on_screen_text: ""
+      visual_description: "surreal dream scene of a city dissolving into particles, dense smoke, chaotic flowing organic motion, cinematic atmosphere"
+      camera: "spatial camera"
+      motion: "morphing organic motion, smoke flowing"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: LOW"
+      visual_direction: {editability: LOW, intent: "AI dream atmosphere"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+      override: {route: THREE_D, source: USER_OVERRIDE, note: "client wants a 3D treatment of this dream city"}
+    expected_routes: [THREE_D]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "用户手动指定 THREE_D，Router 必须应用 override 并保留 source/supersedes（§71-73）。"
+    expect_route_source: USER_OVERRIDE
+    expect_confidence_min: 1.0
+
+  # =========================================================================
+  # REAL_FOOTAGE 类（约 15%）—— 街道 / 人群 / 自然 / 档案 / 真人 / 产品实拍
+  # =========================================================================
+  - id: ROUTE-026
+    test_ref: Test 2
+    category: street
+    description: Busy Tokyo street at night.
+    factors:
+      photorealism: 1.0
+      scene_entropy: 1.0
+      organic_motion: 0.8
+    shot:
+      id: S026
+      on_screen_text: ""
+      visual_description: "busy Tokyo street at night, dense crowd, neon signs, chaotic traffic, steam from food stalls, 街道"
+      camera: "handheld follow"
+      motion: "organic crowd motion, smoke drifting"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: LOW"
+      visual_direction: {editability: LOW, intent: "Tokyo street"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REAL_FOOTAGE]
+    acceptable_alternatives: [GENERATIVE_VIDEO]
+    must_not_route: [REMOTION]
+    reason: "高熵真实街道只能实拍或 AI 生成，绝不能 Remotion（§76 street）；两条路线均可接受（Test 2/§78）。"
+
+  - id: ROUTE-027
+    test_ref: Test 6
+    category: human
+    description: Person walking around a busy office.
+    factors:
+      photorealism: 0.9
+      organic_motion: 0.8
+      scene_entropy: 0.7
+    shot:
+      id: S027
+      on_screen_text: ""
+      visual_description: "真人 walking through a busy open office, 密集 人群 moving between desks, natural gestures, real environment, office crowd, hair and skin visible in close-up"
+      camera: "handheld"
+      motion: "自然身体运动, crowd flowing"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: LOW"
+      visual_direction: {editability: LOW, intent: "office walk-through"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+      available_assets: ["office_walkthrough.mp4"]
+    expected_routes: [REAL_FOOTAGE]
+    acceptable_alternatives: [GENERATIVE_VIDEO]
+    must_not_route: [REMOTION, THREE_D]
+    reason: "真人自然动作与真实环境，实拍或 AI 生成；程序化路线明显错误。"
+
+  - id: ROUTE-028
+    category: nature
+    description: Mountain forest landscape with river and birds.
+    factors:
+      photorealism: 1.0
+      organic_motion: 0.7
+      scene_entropy: 0.5
+    shot:
+      id: S028
+      on_screen_text: ""
+      visual_description: "mountain forest landscape with a river, birds flying, morning mist, nature documentary footage, 实拍"
+      camera: "drone flyover"
+      motion: "birds, water flowing, wind in trees"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 自然实景; Likely: footage; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "nature documentary"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+      available_assets: ["forest_drone.mp4"]
+    expected_routes: [REAL_FOOTAGE]
+    acceptable_alternatives: [GENERATIVE_VIDEO]
+    must_not_route: [REMOTION, THREE_D]
+    reason: "自然生态实拍素材优先复用（§19）；程序化渲染不现实。"
+
+  - id: ROUTE-029
+    category: archive
+    description: Black-and-white archive parade footage.
+    factors:
+      photorealism: 1.0
+      scene_entropy: 0.8
+      organic_motion: 0.6
+    shot:
+      id: S029
+      on_screen_text: ""
+      visual_description: "black-and-white archive footage of a 1960s city parade, 真实 crowd, 人群 dense streets, film grain, historical documentary, 实拍 footage"
+      camera: "static"
+      motion: "crowd moving, flags waving, smoke in air"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 档案素材; Likely: footage; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "archive parade"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+      available_assets: ["archive_parade.mp4"]
+    expected_routes: [REAL_FOOTAGE]
+    acceptable_alternatives: [GENERATIVE_VIDEO]
+    must_not_route: [REMOTION, THREE_D]
+    reason: "历史档案影像必须用真实素材，不能重建（§76 archive）。"
+
+  - id: ROUTE-030
+    category: human
+    description: Real human interview close-up.
+    factors:
+      photorealism: 0.9
+      organic_motion: 0.6
+    shot:
+      id: S030
+      on_screen_text: ""
+      visual_description: "真人 interview close-up, 人脸 with hair and skin texture, real environment, natural light, documentary style, 实拍"
+      camera: "static"
+      motion: "hair moving slightly, natural gesture"
+      audio: {sync_points: [], sfx: [], voiceover: {present: true}}
+      notes: "Layer Intent: BG: 真人采访; Likely: footage; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "interview"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+      available_assets: ["interview_footage.mov"]
+    expected_routes: [REAL_FOOTAGE]
+    acceptable_alternatives: [GENERATIVE_VIDEO]
+    must_not_route: [REMOTION, THREE_D]
+    reason: "真人出镜采访，真实素材为唯一合理选择。"
+
+  - id: ROUTE-031
+    category: street
+    description: Night market street food vendor with flames and smoke.
+    factors:
+      photorealism: 1.0
+      organic_motion: 0.8
+      scene_entropy: 0.8
+    shot:
+      id: S031
+      on_screen_text: ""
+      visual_description: "夜市 night market street food vendor, wok flames, 烟 smoke rising, 人群 dense crowd, real footage, 真实 street, 街道"
+      camera: "handheld"
+      motion: "fire, smoke, crowd flowing"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 夜市实拍; Likely: footage; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "night market"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+      available_assets: ["food_street.mp4"]
+    expected_routes: [REAL_FOOTAGE]
+    acceptable_alternatives: [GENERATIVE_VIDEO]
+    must_not_route: [REMOTION]
+    reason: "夜市高熵街景 + 火焰蒸汽，实拍素材为佳。"
+
+  - id: ROUTE-032
+    category: archive
+    description: NASA archive footage of a rocket launch.
+    factors:
+      photorealism: 0.8
+      scene_entropy: 0.6
+      organic_motion: 0.4
+    shot:
+      id: S032
+      on_screen_text: ""
+      visual_description: "NASA archive footage of a rocket launch, real archival film, 实拍 footage, plume smoke, dense crowd at the launch site"
+      camera: "static"
+      motion: "smoke, crowd"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 档案素材; Likely: footage; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "rocket launch archive"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+      available_assets: ["nasa_launch.mp4"]
+    expected_routes: [REAL_FOOTAGE]
+    acceptable_alternatives: [GENERATIVE_VIDEO]
+    must_not_route: [REMOTION, THREE_D]
+    reason: "历史档案影像必须真实素材（§76 archive / documentary）。"
+
+  - id: ROUTE-033
+    category: nature
+    description: Busy summer beach with waves and crowds at sunset.
+    factors:
+      photorealism: 1.0
+      organic_motion: 0.9
+      scene_entropy: 0.8
+    shot:
+      id: S033
+      on_screen_text: ""
+      visual_description: "busy beach with waves crashing, water foam, 黄昏 sunset light, 人群 crowds, market stalls along the shore, real nature footage, 海边"
+      camera: "static wide"
+      motion: "wave motion, water flowing, crowd moving"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 海边实拍; Likely: footage; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "beach footage"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+      available_assets: ["beach_waves.mp4"]
+    expected_routes: [REAL_FOOTAGE]
+    acceptable_alternatives: [GENERATIVE_VIDEO]
+    must_not_route: [REMOTION, THREE_D]
+    reason: "海浪人群自然运动，实拍素材（§76 nature）。"
+
+  - id: ROUTE-034
+    category: documentary
+    description: Documentary B-roll of a craft workshop.
+    factors:
+      photorealism: 0.9
+      organic_motion: 0.7
+    shot:
+      id: S034
+      on_screen_text: ""
+      visual_description: "documentary B-roll of a traditional craft workshop, real hands working clay, water splashing, smoke from the kiln, dust in sunlight, 实拍 footage, 真实"
+      camera: "static"
+      motion: "hands working, water, smoke"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 纪实素材; Likely: footage; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "craft workshop documentary"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+      available_assets: ["workshop_doc.mp4"]
+    expected_routes: [REAL_FOOTAGE]
+    acceptable_alternatives: [GENERATIVE_VIDEO]
+    must_not_route: [REMOTION, THREE_D]
+    reason: "纪实纪录片 B-roll，真实素材（§76 documentary）。"
+
+  - id: ROUTE-035
+    category: street
+    description: News footage of a city event with real crowd.
+    factors:
+      photorealism: 1.0
+      organic_motion: 0.7
+      scene_entropy: 0.9
+    shot:
+      id: S035
+      on_screen_text: ""
+      visual_description: "news footage of a city event, real crowd on the street, 人群 dense, wind blowing flags, 实拍 footage, 街道"
+      camera: "static"
+      motion: "crowd flowing, flags waving, wind"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 新闻实拍; Likely: footage; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "city event news"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+      available_assets: ["city_event.mp4"]
+    expected_routes: [REAL_FOOTAGE]
+    acceptable_alternatives: [GENERATIVE_VIDEO]
+    must_not_route: [REMOTION, THREE_D]
+    reason: "新闻现场真实事件，必须真实素材（§76 street / documentary）。"
+
+  - id: ROUTE-036
+    category: product
+    description: Real product on a table (photoreal reveal).
+    factors:
+      photorealism: 1.0
+      organic_motion: 0.5
+    shot:
+      id: S036
+      on_screen_text: ""
+      visual_description: "photoreal watch reveal with water droplets and gentle smoke, 实拍 product footage, natural light, 真实 material, real reflections"
+      camera: "slow push"
+      motion: "water, smoke drifting"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 产品实拍; Likely: footage; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "product reveal"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+      available_assets: ["product_watch.mp4"]
+    expected_routes: [REAL_FOOTAGE]
+    acceptable_alternatives: [GENERATIVE_VIDEO, THREE_D, JY_NATIVE]
+    must_not_route: [REMOTION]
+    reason: "§78 示例：真实产品可以有多种合理路线，但程序化合成明显不搭。"
+
+  # =========================================================================
+  # GENERATIVE_VIDEO 类（约 12%）—— 梦境 / 氛围 / 想象环境 / 高熵有机运动
+  # =========================================================================
+  - id: ROUTE-037
+    category: ai_dream
+    description: Surreal dream scene of floating islands.
+    factors:
+      scene_entropy: 0.9
+      organic_motion: 0.9
+      atmosphere_requirement: 0.8
+    shot:
+      id: S037
+      on_screen_text: ""
+      visual_description: "surreal dream scene of floating islands, dense swirling water mist, chaotic smoke, waves drifting, 混乱 imaginary environment, dreamlike atmosphere"
+      camera: "slow drift"
+      motion: "flowing water, smoke rolling, organic motion"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: AI 梦境环境; Likely: generative; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "AI dream scene"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [GENERATIVE_VIDEO]
+    acceptable_alternatives: [REAL_FOOTAGE]
+    must_not_route: [REMOTION, JY_NATIVE]
+    reason: "想象环境 + 高熵有机运动 + 氛围，只能 AI 生成（§20/§76 ai_dream）。"
+
+  - id: ROUTE-038
+    category: cinematic
+    description: Cinematic rainy neon street atmosphere.
+    factors:
+      atmosphere_requirement: 0.9
+      scene_entropy: 0.8
+      organic_motion: 0.7
+    shot:
+      id: S038
+      on_screen_text: ""
+      visual_description: "cinematic rainy neon street at night, 混乱 reflections, dense smoke, swirling mist, dreamlike atmosphere, imaginary cityscape"
+      camera: "crane slow move"
+      motion: "smoke drifting, water dripping, organic motion"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: AI 城市氛围; Likely: generative; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "AI cinematic atmosphere"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [GENERATIVE_VIDEO]
+    acceptable_alternatives: [REAL_FOOTAGE]
+    must_not_route: [REMOTION, JY_NATIVE]
+    reason: "电影感氛围镜头，AI 生成写实环境（§76 cinematic）。"
+
+  - id: ROUTE-039
+    category: ai_dream
+    description: Imaginary alien planet with bioluminescent flora.
+    factors:
+      organic_motion: 0.9
+      scene_entropy: 0.8
+      photorealism: 0.4
+    shot:
+      id: S039
+      on_screen_text: ""
+      visual_description: "alien planet landscape with strange flora, bioluminescent plants swaying in wind, leaves drifting on water, mist waves, 混乱 dense terrain, 复杂场景, imaginary environment, organic motion"
+      camera: "slow drift"
+      motion: "plants swaying, wind, mist waves, organic motion"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 异星环境; Likely: generative; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "alien planet"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [GENERATIVE_VIDEO]
+    acceptable_alternatives: []
+    must_not_route: [REMOTION, JY_NATIVE, THREE_D]
+    reason: "现实中不存在的异星环境 + 复杂有机运动，AI 生成（§76 ai_dream）。"
+
+  - id: ROUTE-040
+    category: ai_dream
+    description: Liquid morph in a dreamlike underwater cavern.
+    factors:
+      organic_motion: 1.0
+      scene_entropy: 0.8
+      atmosphere_requirement: 0.6
+    shot:
+      id: S040
+      on_screen_text: ""
+      visual_description: "dreamlike underwater cavern, bioluminescent particles drifting, flowing water currents, waves, flowing motion, morphing shapes, dense organic detail, 混乱 复杂场景, imaginary environment"
+      camera: "slow drift"
+      motion: "water currents, waves, flowing motion, organic motion"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: AI 水下幻境; Likely: generative; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "underwater dream"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [GENERATIVE_VIDEO]
+    acceptable_alternatives: [REAL_FOOTAGE]
+    must_not_route: [REMOTION, JY_NATIVE]
+    reason: "流体有机运动 + 想象环境，AI 生成。"
+
+  - id: ROUTE-041
+    category: cinematic
+    description: Mythical phoenix made of fire and smoke.
+    factors:
+      organic_motion: 1.0
+      scene_entropy: 0.8
+      atmosphere_requirement: 0.7
+    shot:
+      id: S041
+      on_screen_text: ""
+      visual_description: "a mythical phoenix made of fire and smoke flying through a canyon, 混乱 dense flames, swirling smoke, cinematic atmosphere, imaginary creature, organic fire motion"
+      camera: "dynamic follow"
+      motion: "fire, smoke, morph, organic motion"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 凤凰火鸟; Likely: generative; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "mythical phoenix"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [GENERATIVE_VIDEO]
+    acceptable_alternatives: []
+    must_not_route: [REMOTION, THREE_D, JY_NATIVE]
+    reason: "虚构生物 + 火焰烟雾有机运动，AI 生成。"
+
+  - id: ROUTE-042
+    category: nature
+    description: Misty mountain ridge at dawn (imaginary vantage).
+    factors:
+      scene_entropy: 0.8
+      organic_motion: 0.8
+      atmosphere_requirement: 0.8
+    shot:
+      id: S042
+      on_screen_text: ""
+      visual_description: "misty mountain ridge at dawn, dense clouds flowing over peaks, 混乱 swirling fog, wind, waves of mist, smoke-like fog, atmospheric, organic cloud motion, imaginary vantage point"
+      camera: "slow pan"
+      motion: "clouds flowing, wind, fog rolling, organic motion"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: AI 云海; Likely: generative; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "foggy mountains"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [GENERATIVE_VIDEO]
+    acceptable_alternatives: [REAL_FOOTAGE]
+    must_not_route: [REMOTION, JY_NATIVE]
+    reason: "高熵云雾有机流动 + 氛围，AI 生成更合理。"
+
+  - id: ROUTE-043
+    category: cinematic
+    description: Building explosion in slow motion.
+    factors:
+      scene_entropy: 1.0
+      organic_motion: 0.9
+      physical_complexity: 0.8
+    shot:
+      id: S043
+      on_screen_text: ""
+      visual_description: "explosion of a factory in slow motion, 爆炸 debris, dense smoke, 混乱 chaotic fire, organic destructive motion, cinematic atmosphere"
+      camera: "slow motion wide"
+      motion: "fire, smoke, debris flying, organic motion"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 爆炸场景; Likely: generative; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "explosion slow motion"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [GENERATIVE_VIDEO]
+    acceptable_alternatives: [REAL_FOOTAGE]
+    must_not_route: [REMOTION, JY_NATIVE]
+    reason: "高熵破坏场景 + 火焰烟雾，实拍或 AI 生成；程序化不现实。"
+
+  - id: ROUTE-044
+    category: nature
+    description: Wind-swept desert dunes with sandstorm.
+    factors:
+      scene_entropy: 0.9
+      organic_motion: 0.9
+      atmosphere_requirement: 0.6
+    shot:
+      id: S044
+      on_screen_text: ""
+      visual_description: "wind-swept desert dunes, 混乱 dense sandstorm, smoke-like dust clouds rolling, flowing organic motion, wave of sand, dreamlike atmosphere, imaginary landscape"
+      camera: "slow drift"
+      motion: "sand flowing, dust clouds, organic motion"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 沙漠幻境; Likely: generative; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "desert wind"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [GENERATIVE_VIDEO]
+    acceptable_alternatives: [REAL_FOOTAGE]
+    must_not_route: [REMOTION, JY_NATIVE]
+    reason: "沙暴高熵有机流动，AI 生成。"
+
+  - id: ROUTE-045
+    category: particles
+    description: Ethereal particle dream atmosphere.
+    factors:
+      organic_motion: 1.0
+      scene_entropy: 0.9
+      atmosphere_requirement: 0.8
+    shot:
+      id: S045
+      on_screen_text: ""
+      visual_description: "ethereal abstract dream, glowing particles flowing like water, waves of light, morphing shapes, dense swirling smoke, chaotic 混乱, cinematic atmosphere, no text"
+      camera: "slow drift"
+      motion: "particles flowing, waves, flowing motion, organic motion"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: AI 粒子梦境; Likely: generative; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "ethereal particles"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [GENERATIVE_VIDEO]
+    acceptable_alternatives: []
+    must_not_route: [REMOTION, JY_NATIVE]
+    reason: "抽象氛围粒子流动，AI 生成；注意区分于结构化粒子（ROUTE-010）。"
+
+  # =========================================================================
+  # JY_NATIVE 类（约 20%）—— 照片 / 字幕 / B-roll / 简单标题 / 转场
+  # =========================================================================
+  - id: ROUTE-046
+    test_ref: Test 4
+    category: photo
+    description: Single archive photo with slow zoom and subtitle.
+    factors:
+      editability_requirement: 0.9
+      camera_complexity: 0.3
+    shot:
+      id: S046
+      on_screen_text: ""
+      visual_description: "single archive photo, gentle slow zoom in, warm lighting"
+      camera: "static slow zoom 5%"
+      motion: "none, just slow zoom"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "SUBTITLE: 字幕说明; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "BG: photo; SUBTITLE: caption"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [REMOTION, GENERATIVE_VIDEO]
+    reason: "照片慢推 + 字幕，剪映 3 个关键帧即可完成，不要过度工程化（Test 4/§21）。"
+
+  - id: ROUTE-047
+    test_ref: Test 10
+    category: subtitle
+    description: Simple subtitle text at the bottom.
+    factors:
+      text_accuracy: 0.6
+      editability_requirement: 1.0
+    shot:
+      id: S047
+      on_screen_text: "字幕台词"
+      visual_description: "plain subtitle text at the bottom, simple, no animation"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: true}}
+      notes: "SUBTITLE: 字幕层; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "simple subtitle"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, THREE_D]
+    reason: "纯字幕最典型的时间线原生内容，必须 KEEP_EDITABLE（Test 10/§29）。"
+
+  - id: ROUTE-048
+    test_ref: Test 15
+    category: subtitle
+    description: Explainer section with subtitle, photo, B-roll and music.
+    factors:
+      editability_requirement: 1.0
+    shot:
+      id: S048
+      on_screen_text: ""
+      visual_description: "explainer section with simple subtitle, photo, B-roll and music, plain cut, simple edit"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: true}}
+      notes: "SUBTITLE: 字幕; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "explainer edit"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: [REMOTION]
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "长 explainer 的字幕/照片/B-roll 应保持时间线可编辑（Test 15/§57）。"
+
+  - id: ROUTE-049
+    category: photo
+    description: Ken Burns family portrait.
+    factors:
+      camera_complexity: 0.3
+      editability_requirement: 0.8
+    shot:
+      id: S049
+      on_screen_text: ""
+      visual_description: "family portrait photo with a gentle Ken Burns pan and slow zoom, warm light"
+      camera: "slow zoom and pan"
+      motion: "none, simple Ken Burns"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "Ken Burns portrait"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [REMOTION, GENERATIVE_VIDEO]
+    reason: "照片慢推（Ken Burns），剪映原生即可（§76 photo）。"
+
+  - id: ROUTE-050
+    category: photo
+    description: B-roll of office plants with a straight cut.
+    factors:
+      editability_requirement: 0.8
+    shot:
+      id: S050
+      on_screen_text: ""
+      visual_description: "simple B-roll of office plants with a straight cut, plain composition"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "B-roll insert"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, THREE_D]
+    reason: "B-roll 时间线插入素材（§21/§76 photo）。"
+
+  - id: ROUTE-051
+    category: typography
+    description: Simple title text fading in and out.
+    factors:
+      text_accuracy: 0.5
+      editability_requirement: 0.8
+    shot:
+      id: S051
+      on_screen_text: ""
+      visual_description: "simple title text fading in and out on a plain background"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "simple title"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, THREE_D]
+    reason: "简单标题淡入淡出，剪映原生足够（§76 logo/subtitle）。"
+
+  - id: ROUTE-052
+    category: photo
+    description: Two photos with a simple crossfade transition.
+    factors:
+      editability_requirement: 0.8
+    shot:
+      id: S052
+      on_screen_text: ""
+      visual_description: "two photos with a simple crossfade transition, plain edit"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "crossfade"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, THREE_D]
+    reason: "简单转场，时间线原生。"
+
+  - id: ROUTE-053
+    category: logo
+    description: Company logo fading in at the end card.
+    factors:
+      editability_requirement: 0.8
+    shot:
+      id: S053
+      on_screen_text: ""
+      visual_description: "company logo fading in and out at the end, plain background, simple fade"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "logo fade"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, THREE_D]
+    reason: "简单 Logo 淡入淡出，无需启动 Remotion（§21/§76 logo）。"
+
+  - id: ROUTE-054
+    category: photo
+    description: Travel photo slideshow with simple cuts.
+    factors:
+      editability_requirement: 0.8
+    shot:
+      id: S054
+      on_screen_text: ""
+      visual_description: "photo slideshow of travel pictures with simple cuts, plain edit"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "photo slideshow"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, THREE_D]
+    reason: "照片轮播简单切换，时间线原生（§76 photo）。"
+
+  - id: ROUTE-055
+    category: product
+    description: Product photos in a simple carousel.
+    factors:
+      editability_requirement: 0.8
+    shot:
+      id: S055
+      on_screen_text: ""
+      visual_description: "three product photos in a simple carousel with quick cuts"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "product carousel"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, THREE_D]
+    reason: "产品照片快速切换，简单剪辑。"
+
+  - id: ROUTE-056
+    category: social
+    description: Simple vertical social media short.
+    factors:
+      editability_requirement: 0.8
+    shot:
+      id: S056
+      on_screen_text: ""
+      visual_description: "simple vertical short with a photo and basic text, quick cut"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "social short"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, THREE_D]
+    reason: "社交媒体竖版短视频，简单图片+文字（§76 social media）。"
+
+  - id: ROUTE-057
+    category: interface
+    description: Screen recording with a simple caption.
+    factors:
+      text_accuracy: 0.5
+      editability_requirement: 0.8
+    shot:
+      id: S057
+      on_screen_text: ""
+      visual_description: "screen recording of a web page with a simple caption below, static"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: true}}
+      notes: "SUBTITLE: 字幕; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "screen recording"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, THREE_D]
+    reason: "录屏 + 简单字幕，时间线拼接即可。"
+
+  - id: ROUTE-058
+    category: logo
+    description: End card with thank-you text and logo.
+    factors:
+      editability_requirement: 0.8
+    shot:
+      id: S058
+      on_screen_text: ""
+      visual_description: "end card with thank-you text and a simple logo, static"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "end card"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, THREE_D]
+    reason: "收尾卡片静态内容，简单剪辑（§76 logo）。"
+
+  - id: ROUTE-059
+    category: photo
+    description: Narration with simple still images and straight cuts.
+    factors:
+      editability_requirement: 0.8
+    shot:
+      id: S059
+      on_screen_text: ""
+      visual_description: "narration with simple still images and straight cuts, plain edit"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: true}}
+      notes: "Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "narration stills"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO, THREE_D]
+    reason: "旁白 + 静态图直切，简单剪辑。"
+
+  - id: ROUTE-060
+    test_ref: Test 13
+    category: ai_dream
+    description: Very abstract concept, AI consciousness as infinite archive.
+    factors:
+      atmosphere_requirement: 0.7
+    shot:
+      id: S060
+      on_screen_text: ""
+      visual_description: "a vague abstract idea of AI consciousness as an infinite archive, soft floating shapes, no concrete objects, no words"
+      camera: "none"
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: ""
+      visual_direction: {}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [JY_NATIVE]
+    acceptable_alternatives: [REMOTION]
+    must_not_route: [GENERATIVE_VIDEO, THREE_D]
+    reason: "抽象概念不应硬给高成本结论；重点在 LOW/MEDIUM 置信度 + 原型验证（Test 13）。"
+    expect_confidence_max: 0.79
+    expect_prototype_required: true
+
+  # =========================================================================
+  # HYBRID 类（约 21%）—— 写实环境 + 精确文字/数据 / 3D + UI 叠加
+  # =========================================================================
+  - id: ROUTE-061
+    test_ref: Test 5
+    category: documentary
+    description: Photoreal memory museum with accurate floating text.
+    factors:
+      photorealism: 1.0
+      text_accuracy: 1.0
+      editability_requirement: 0.8
+    shot:
+      id: S061
+      on_screen_text: "AI HALL / EST. 2049"
+      visual_description: "photo-real museum gallery with crowds of real visitors, dreamlike lighting, floating text labels must be exact, 真实博物馆实景"
+      camera: static
+      motion: "visitors drifting through, gentle bokeh"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 真实博物馆; TYPO: 精确浮层文字; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "BG: real museum; TYPO: exact labels"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "AI 环境 + 精确浮层文字，必须拆分 Layer（Test 5/§22）。"
+
+  - id: ROUTE-062
+    test_ref: Test 9
+    category: product
+    description: 3D phone with floating UI labels over a photoreal desk.
+    factors:
+      photorealism: 0.6
+      text_accuracy: 1.0
+      physical_complexity: 0.5
+      camera_complexity: 0.5
+    shot:
+      id: S062
+      on_screen_text: "48MP / 120Hz"
+      visual_description: "3D smartphone floating over a photoreal desk with real reflections, floating UI labels with exact specs, orbit camera"
+      camera: "orbit around the phone"
+      motion: "labels pulse in sync"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: 3D: 手机模型; UI: 浮层标签; TYPO: 精确文案; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "3D phone + UI labels"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: [THREE_D]
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "3D 产品 + 精确 UI 标签 + 写实桌面，需 3D/程序化/环境多 Producer（Test 9）。"
+
+  - id: ROUTE-063
+    test_ref: Test 12
+    category: street
+    description: Photoreal scene with important exact UI copy (AI text trap).
+    factors:
+      photorealism: 1.0
+      text_accuracy: 1.0
+      scene_entropy: 0.8
+    shot:
+      id: S063
+      on_screen_text: "CAFÉ 24H"
+      visual_description: "photoreal street corner at dusk with a glowing storefront, the sign text must be exact and readable, real crowd passing, 真实街道"
+      camera: static
+      motion: "gentle bokeh, people passing"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 真实街道; TYPO: 招牌文字必须精确; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "BG: real street; TYPO: exact sign"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "AI Text Trap：生成式不能独占精确文字，必须 HYBRID 分层（Test 12/§36）。"
+
+  - id: ROUTE-064
+    category: human
+    description: Real human presenter with floating data nodes.
+    factors:
+      photorealism: 0.9
+      data_accuracy: 1.0
+      text_accuracy: 0.8
+    shot:
+      id: S064
+      on_screen_text: "REVENUE +32% / USERS 2.4M"
+      visual_description: "real human presenter on stage with floating data nodes and exact statistics around them, photoreal stage lighting, 真人"
+      camera: static
+      motion: "nodes pulse in sync"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 真人舞台; DATA: 数据节点; TYPO: 精确数字; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "presenter + data nodes"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "真人 + 精确数据节点叠加，环境与数据分属不同 Producer。"
+
+  - id: ROUTE-065
+    category: archive
+    description: Real archive footage with exact title overlay.
+    factors:
+      photorealism: 0.7
+      text_accuracy: 1.0
+      data_accuracy: 0.5
+    shot:
+      id: S065
+      on_screen_text: "1972 / THE MISSION"
+      visual_description: "real archive footage with an exact title overlay and date stamp, 实拍 historical footage, 真实"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 实拍档案; TYPO: 标题; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "archive + title"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "档案画面 + 精确标题/日期叠加，分层生产。"
+
+  - id: ROUTE-066
+    category: nature
+    description: Photoreal forest with exact weather data overlay.
+    factors:
+      photorealism: 1.0
+      data_accuracy: 1.0
+      text_accuracy: 0.7
+    shot:
+      id: S066
+      on_screen_text: "TEMPERATURE 18°C / WIND 12 km/h"
+      visual_description: "photoreal forest landscape with exact weather data overlay, temperature and wind numbers, 真实自然风景, leaves swaying"
+      camera: static
+      motion: "leaves sway"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 真实森林; DATA: 气象数据; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "forest + weather overlay"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "真实自然 + 精确气象数字，环境与数据分层。"
+
+  - id: ROUTE-067
+    category: street
+    description: Real city street with exact location labels overlaid.
+    factors:
+      photorealism: 1.0
+      text_accuracy: 1.0
+      scene_entropy: 0.8
+    shot:
+      id: S067
+      on_screen_text: "SHINJUKU / 新宿"
+      visual_description: "真实 city street with 人群 dense crowd passing, photoreal atmosphere, exact location labels overlaid, floating UI tags must be precise, 街道"
+      camera: static
+      motion: "crowd flowing, gentle bokeh"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 真实街道; UI: 位置标签; TYPO: 精确地名; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "street + location labels"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "真实街景 + 精确地名 UI 叠加（§26/§37 风格）。"
+
+  - id: ROUTE-068
+    category: product
+    description: Real product with animated callout arrows and exact labels.
+    factors:
+      photorealism: 0.9
+      text_accuracy: 1.0
+      structural_precision: 0.5
+    shot:
+      id: S068
+      on_screen_text: "TITANIUM / 5G / 2 DAYS"
+      visual_description: "photoreal product on a real table with animated arrow callouts and exact feature labels, 实拍 product footage with precise overlay UI"
+      camera: "slow push"
+      motion: "arrows draw in sequence with spring"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 实拍产品; UI: 箭头标注; TYPO: 特性标签; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "product + callout arrows"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "实拍产品 + 动画标注箭头 + 精确标签，分层。"
+
+  - id: ROUTE-069
+    category: human
+    description: Real interview footage with a chat UI overlay.
+    factors:
+      photorealism: 0.8
+      text_accuracy: 1.0
+      structural_precision: 0.6
+    shot:
+      id: S069
+      on_screen_text: "HI, I'M LEON / HELLO"
+      visual_description: "真人 interview footage with a chat UI overlay showing exact message text, real environment, photoreal, precise interface"
+      camera: static
+      motion: "messages appear in sync with speech"
+      audio: {sync_points: [], sfx: [], voiceover: {present: true}}
+      notes: "Layer Intent: BG: 真人采访; UI: 聊天界面; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "interview + chat UI"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "真人画面 + 聊天界面精确文字叠加。"
+
+  - id: ROUTE-070
+    category: product
+    description: 3D headphone in front of a photoreal city with UI labels.
+    factors:
+      photorealism: 0.7
+      text_accuracy: 0.9
+      camera_complexity: 0.6
+      physical_complexity: 0.5
+    shot:
+      id: S070
+      on_screen_text: "ANC / 40H BATTERY"
+      visual_description: "3D headphone model in front of a photoreal city background with UI labels, orbit camera, 真实 urban scene, precise floating labels"
+      camera: "orbit"
+      motion: "labels pulse in sync"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: 3D: 耳机; BG: 真实城市; UI: 参数标签; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "headphone + city + UI"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: [THREE_D]
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "3D 产品 + 写实背景 + 精确 UI 参数，三 Producer 分层。"
+
+  - id: ROUTE-071
+    category: map
+    description: Documentary migration footage with animated map overlay.
+    factors:
+      photorealism: 0.8
+      data_accuracy: 1.0
+      structural_precision: 0.7
+    shot:
+      id: S071
+      on_screen_text: "MIGRATION 2026 / 12,400 KM"
+      visual_description: "documentary footage of migrating birds with an animated map and exact route labels overlaid, 实拍 nature footage, precise data"
+      camera: static
+      motion: "map route draws in sequence"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 实拍迁徙; DATA: 地图路线; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "documentary + map overlay"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "实拍纪录片 + 动画地图路线数据叠加。"
+
+  - id: ROUTE-072
+    category: cinematic
+    description: Cinematic photoreal opening shot with exact title text.
+    factors:
+      photorealism: 0.9
+      text_accuracy: 1.0
+      atmosphere_requirement: 0.7
+    shot:
+      id: S072
+      on_screen_text: "CHAPTER TWO"
+      visual_description: "cinematic photoreal opening shot of a city skyline at dusk, 真实 atmosphere, exact title text in the center, precise typography"
+      camera: "slow push"
+      motion: "smoke drifting, city lights"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 真实天际线; TYPO: 章节标题; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "cinematic opening + title"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "写实氛围画面 + 精确章节标题，分层生产。"
+
+  - id: ROUTE-073
+    category: human
+    description: Real office environment with floating metric badges.
+    factors:
+      photorealism: 0.9
+      data_accuracy: 1.0
+      text_accuracy: 0.8
+    shot:
+      id: S073
+      on_screen_text: "PRODUCTIVITY +18%"
+      visual_description: "真实 office environment with floating metric badges showing exact numbers, 人群 people working, photoreal, precise data overlay"
+      camera: static
+      motion: "badges float, data ticks in sync"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: 真实办公室; DATA: 指标徽章; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "office + metric badges"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: []
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "真实办公环境 + 精确指标徽章叠加。"
+
+  - id: ROUTE-074
+    category: ai_dream
+    description: Generative dream background with accurate subtitle text.
+    factors:
+      photorealism: 0.8
+      text_accuracy: 1.0
+      scene_entropy: 0.7
+    shot:
+      id: S074
+      on_screen_text: "梦境中的城市"
+      visual_description: "photoreal dreamlike scene of a crowd in a glowing forest, dense swirling mist, generative background, with accurate subtitle text at the bottom"
+      camera: "slow drift"
+      motion: "mist flowing, organic motion"
+      audio: {sync_points: [], sfx: [], voiceover: {present: true}}
+      notes: "Layer Intent: BG: AI 梦境环境; SUBTITLE: 精确字幕; Editability: HIGH"
+      visual_direction: {editability: HIGH, intent: "AI dream bg + subtitle"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [HYBRID]
+    acceptable_alternatives: [JY_NATIVE]
+    must_not_route: [GENERATIVE_VIDEO]
+    reason: "AI 背景 + 精确字幕：字幕必须由结构化 Producer 产出（KEEP_EDITABLE），生成式不能独占。"
+
+  # =========================================================================
+  # 故意困难 case（诚实记录，暴露引擎系统性误判，§78 "避开明显错误" 测试）
+  # =========================================================================
+  - id: ROUTE-075
+    category: product
+    description: "Naive phrasing of §78 example: real product on a table."
+    factors:
+      photorealism: 0.8
+    shot:
+      id: S075
+      on_screen_text: ""
+      visual_description: "a real product on a table, natural light, photoreal, simple composition"
+      camera: static
+      motion: "none"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Editability: MEDIUM"
+      visual_direction: {editability: MEDIUM, intent: "product on table"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [REAL_FOOTAGE]
+    acceptable_alternatives: [GENERATIVE_VIDEO, THREE_D]
+    must_not_route: [REMOTION]
+    reason: "§78 原例：真实产品可以有多种合理路线（实拍/3D/AI 生成），但不该走纯程序化合成。"
+    expect_fail_hint: "engines JY_NATIVE default bias: photoreal-only signal does not raise JY complexity; a plain timeline edit is chosen over footage sourcing."
+
+  - id: ROUTE-076
+    category: ai_dream
+    description: "Photoreal underwater scene with fluid motion (substring false-positive trap)."
+    factors:
+      organic_motion: 1.0
+      scene_entropy: 0.7
+      photorealism: 0.7
+    shot:
+      id: S076
+      on_screen_text: ""
+      visual_description: "photoreal underwater scene with fluid motion, dense swirling water currents, waves, smoke, organic flow, dreamlike atmosphere, imaginary depth"
+      camera: "slow drift"
+      motion: "fluid motion, water currents, organic flow"
+      audio: {sync_points: [], sfx: [], voiceover: {present: false}}
+      notes: "Layer Intent: BG: AI 水下幻境; Likely: generative; Editability: LOW"
+      visual_direction: {editability: LOW, intent: "underwater fluid dream"}
+    context:
+      production_mode: PRODUCT_TECH_SHORT
+    expected_routes: [GENERATIVE_VIDEO]
+    acceptable_alternatives: [REAL_FOOTAGE]
+    must_not_route: [REMOTION, JY_NATIVE]
+    reason: "写实水下有机流体属于 AI/实拍路线；不应拆成 HYBRID。"
+    expect_fail_hint: "engine keyword scanner is naive substring match: 'ui' inside 'fluid' and 'tab' inside 'editability' falsely raise structural_precision>=0.45, triggering HYBRID text_dim threshold."

@@ -1,0 +1,540 @@
+# ============================================================
+# ZHOU_Videodirector — dependencies.yaml
+# 机器可读依赖 / 参考地图（Phase 1 版）
+# ------------------------------------------------------------
+# 依据:
+#   - 总设计 v0.2 §68 / §69 / §70 / §71（Reference & Reuse Map）
+#   - Phase-1 Prompt §33（字段定义）
+# 每条参考字段:
+#   name / url / integration_mode / role / status / reuse /
+#   do_not / license_notes / required_phase
+# integration_mode 枚举（v0.2 §62）:
+#   EXTERNAL_SKILL | PROVIDER | KNOWLEDGE_ADAPTER |
+#   ARCHITECTURE_REFERENCE | TIMELINE_BACKEND | RESOURCE_PROVIDER
+# status 枚举: planned（规划）| discovered（本机已发现）|
+#   experimental（实验）| deferred（推迟）
+# required_phase 标注该依赖首次使用的 Phase（v0.2 §64）
+# ============================================================
+
+version: "1.0"
+phase: 1
+updated: "2026-08-15"
+
+# ---------- C. 主设计版本说明 ----------
+design_documents:
+  - path: docs/design/ZHOU_Videodirector_总设计_v0.2.md
+    version: v0.2
+    authoritative: true
+    note: 主设计文档，冲突时以 v0.2 为准
+  - path: /Users/mac/Downloads/ZHOU_Videodirector_开发总目标与系统设计_v0.1.md
+    version: v0.1
+    authoritative: false
+    note: 旧版，不引入仓库；v0.2 > v0.1
+
+# ---------- A. References（v0.2 §68 全部条目，完整收录） ----------
+references:
+
+  # ===== Reference Video Analysis（Phase 2 Reference workflow）=====
+  watch-video-skill:
+    name: watch-video-skill
+    url: https://github.com/Newuxtreme/watch-video-skill
+    integration_mode: [EXTERNAL_SKILL]
+    role: reference_video_ingestion
+    status: planned
+    reuse:
+      - video_download_and_reading
+      - frame_extraction
+      - transcript_and_timeline
+      - temporal_alignment
+    do_not:
+      - rewrite_video_ingestion_from_zero
+    license_notes: 接入前复核仓库 LICENSE
+    required_phase: 2
+
+  claude-video:
+    name: claude-video
+    url: https://github.com/bradautomates/claude-video
+    integration_mode: [EXTERNAL_SKILL]
+    role: reference_video_ingestion_fallback
+    status: planned
+    reuse:
+      - yt_dlp_plus_ffmpeg_workflow
+      - transcript_extraction
+      - frame_extraction
+    do_not:
+      - build_parallel_video_stack
+    license_notes: 备用方案，接入前复核
+    required_phase: 2
+
+  # ===== Director / Creative（Phase 2 Director Pipeline）=====
+  remotion-video-director:
+    name: remotion-video-director
+    url: https://github.com/BayramAnnakov/remotion-video-director
+    integration_mode: [KNOWLEDGE_ADAPTER]
+    role: interactive_director_methodology
+    status: planned
+    reuse:
+      - requirement_to_scenario_workflow
+      - creative_proposal_flow
+      - remotion_production_orchestration
+    do_not:
+      - copy_entire_repository
+      - make_it_master_workflow
+    license_notes: 只吸收方法论，不复制实现
+    required_phase: 2
+
+  director-skill:
+    name: DirectorSKILL
+    url: https://github.com/wuwangzhang1216/DirectorSKILL
+    integration_mode: [EXTERNAL_SKILL, KNOWLEDGE_ADAPTER]
+    role: cinematic_ai_video_direction
+    status: planned
+    reuse:
+      - beat_and_blocking
+      - shot_list
+      - camera_and_keyframe_prompt
+      - video_prompt_and_continuity
+      - edit_timeline
+    do_not:
+      - copy_entire_repository
+      - use_without_license_review
+    license_notes: 接入前复核 LICENSE
+    required_phase: 2
+
+  video-shotcraft:
+    name: video-shotcraft
+    url: https://github.com/Vincentwei1021/video-shotcraft
+    integration_mode: [KNOWLEDGE_ADAPTER]
+    role: motion_shot_design
+    status: planned
+    reuse:
+      - shot_recipe_taxonomy
+      - motion_language
+      - camera_patterns
+      - product_video_structure
+      - sound_design_patterns
+      - aesthetic_qa
+    do_not:
+      - copy_entire_repository
+      - make_it_master_workflow
+    license_notes: 只吸收方法论，不复制实现
+    required_phase: 2
+
+  taste-skill:
+    name: taste-skill
+    url: https://github.com/Leonxlnx/taste-skill
+    integration_mode: [KNOWLEDGE_ADAPTER]
+    role: taste_anti_slop_rules
+    status: planned
+    reuse:
+      - design_language_rules
+      - motion_intensity
+      - density_control
+      - anti_template_rules
+    do_not:
+      - copy_entire_repository
+    license_notes: 只吸收规则，不复制实现
+    required_phase: 2
+
+  # ===== Architecture（Phase 3 Router 参考）=====
+  open-montage:
+    name: OpenMontage
+    url: https://github.com/calesthio/OpenMontage
+    integration_mode: [ARCHITECTURE_REFERENCE]
+    role: agentic_video_architecture
+    status: planned
+    reuse:
+      - pipeline_design
+      - tool_provider_registry_pattern
+      - agentic_video_production
+      - capability_orchestration
+    do_not:
+      - copy_entire_implementation
+      - clone_repository
+    license_notes: 仅参考架构设计
+    required_phase: 3
+
+  # ===== Remotion（Phase 5 Motion Engine）=====
+  remotion-official-skills:
+    name: Remotion Official Agent Skills
+    url: https://www.remotion.dev/docs/ai/skills
+    integration_mode: [EXTERNAL_SKILL]
+    role: remotion_correct_implementation
+    status: planned
+    reuse:
+      - official_remotion_skills
+      - remotion_best_practices
+    do_not:
+      - reimplement_remotion_primitives
+    license_notes: Remotion 官方文档与 MIT 许可组件
+    required_phase: 5
+
+  remotion-bits:
+    name: remotion-bits
+    url: https://github.com/av/remotion-bits
+    integration_mode: [PROVIDER]
+    role: remotion_motion_components
+    status: planned
+    reuse:
+      - text_components
+      - transition_components
+      - particle_components
+      - 3d_scene_components
+      - find_and_fetch_on_demand
+    do_not:
+      - bulk_clone_entire_repository
+    license_notes: 按需获取单个组件，复核组件许可
+    required_phase: 4
+
+  onda:
+    name: onda
+    url: https://github.com/degueba/onda
+    integration_mode: [PROVIDER]
+    role: remotion_motion_graphics
+    status: planned
+    reuse:
+      - copy_paste_motion_graphics
+      - motion_presets
+    do_not:
+      - bulk_clone_entire_repository
+    license_notes: 按需获取，复核许可
+    required_phase: 4
+
+  remotion-ui:
+    name: remotion-ui
+    url: https://github.com/riaz37/remotion-ui
+    integration_mode: [PROVIDER]
+    role: remotion_ui_scene_components
+    status: planned
+    reuse:
+      - caption_components
+      - scene_components
+      - transition_components
+      - composition_components
+    do_not:
+      - bulk_clone_entire_repository
+    license_notes: 官方文档 https://remotionui.com/docs，复核许可
+    required_phase: 4
+
+  remocn:
+    name: remocn
+    url: https://github.com/kapishdima/remocn
+    integration_mode: [RESOURCE_PROVIDER]
+    role: remotion_primitive_reference
+    status: planned
+    reuse:
+      - remotion_primitives
+      - deterministic_animation_patterns
+    do_not:
+      - bulk_clone_entire_repository
+    license_notes: 可复制 Primitive 参考，复核许可
+    required_phase: 4
+
+  # ===== 3D Stack（Phase 5 Motion / 3D Engine）=====
+  react-three-fiber:
+    name: react-three-fiber
+    url: https://github.com/pmndrs/react-three-fiber
+    integration_mode: [PROVIDER]
+    role: 3d_rendering_core
+    status: planned
+    reuse:
+      - react_threejs_rendering
+      - remotion_three_integration
+    do_not:
+      - reimplement_rendering_core
+    license_notes: MIT
+    required_phase: 5
+
+  drei:
+    name: drei
+    url: https://github.com/pmndrs/drei
+    integration_mode: [PROVIDER]
+    role: 3d_helpers
+    status: planned
+    reuse:
+      - r3f_high_level_helpers
+    do_not:
+      - reimplement_helpers
+    license_notes: MIT
+    required_phase: 5
+
+  gltfjsx:
+    name: gltfjsx
+    url: https://github.com/pmndrs/gltfjsx
+    integration_mode: [PROVIDER]
+    role: gltf_to_react
+    status: planned
+    reuse:
+      - gltf_to_r3f_jsx_conversion
+    do_not:
+      - reimplement_gltf_pipeline
+    license_notes: MIT
+    required_phase: 5
+
+  poly-haven:
+    name: Poly Haven Public API
+    url: https://github.com/Poly-Haven/Public-API
+    integration_mode: [RESOURCE_PROVIDER]
+    role: 3d_model_hdri_texture_registry
+    status: planned
+    reuse:
+      - asset_lists
+      - categories
+      - asset_metadata
+      - on_demand_download
+    do_not:
+      - bulk_download_all_assets
+    license_notes: 各素材许可各异（多数 CC0），按 Asset 复核
+    required_phase: 4
+
+  # ===== Editable Timeline（Phase 7）=====
+  pyjianyingdraft:
+    name: pyJianYingDraft
+    url: https://github.com/GuanYixuan/pyJianYingDraft
+    integration_mode: [TIMELINE_BACKEND]
+    role: jianying_editable_timeline
+    status: planned
+    reuse:
+      - draft_generation
+      - timeline_tracks
+      - media_placement
+      - basic_keyframes
+      - subtitles
+      - audio_and_sfx
+      - simple_effects
+    do_not:
+      - fork_and_rewrite_editor
+    license_notes: 接入前复核仓库 LICENSE
+    required_phase: 7
+
+  vectcut-api:
+    name: VectCutAPI
+    url: https://github.com/sun-guannan/VectCutAPI
+    integration_mode: [TIMELINE_BACKEND, ARCHITECTURE_REFERENCE]
+    role: timeline_agent_alternative
+    status: planned
+    reuse:
+      - agent_video_editing_api
+      - jianying_capcut_draft_approach
+    do_not:
+      - fork_and_rewrite_editor
+    license_notes: 备用/参考，接入前复核
+    required_phase: 7
+
+  pycapcut:
+    name: pyCapCut
+    url: https://github.com/GuanYixuan/pyCapCut
+    integration_mode: [TIMELINE_BACKEND]
+    role: capcut_timeline_backend
+    status: planned
+    reuse:
+      - capcut_draft_automation
+    do_not:
+      - fork_and_rewrite_editor
+    license_notes: 备用后端，接入前复核
+    required_phase: 7
+
+  # ===== SFX / Music（Phase 4 Resource Registry）=====
+  remotion-sfx:
+    name: "@remotion/sfx"
+    url: https://www.remotion.dev/docs/sfx/
+    integration_mode: [RESOURCE_PROVIDER]
+    role: remotion_sfx_tier0
+    status: planned
+    reuse:
+      - official_ready_to_use_sfx
+    do_not:
+      - reimplement_basic_sfx
+    license_notes: Remotion 官方 SFX 包
+    required_phase: 4
+
+  materia-sound-theme:
+    name: materia-sound-theme
+    url: https://github.com/nana-4/materia-sound-theme
+    integration_mode: [RESOURCE_PROVIDER]
+    role: ui_sound_language_reference
+    status: planned
+    reuse:
+      - google_material_sound_resources
+      - ui_product_sound_language
+    do_not:
+      - bundle_unreviewed_sounds
+    license_notes: 参考 UI 音效语言，实际素材需复核许可
+    required_phase: 4
+
+  freesound:
+    name: Freesound API
+    url: https://freesound.org/docs/api/resources_apiv2.html
+    integration_mode: [RESOURCE_PROVIDER]
+    role: large_sfx_search
+    status: planned
+    reuse:
+      - api_search
+      - metadata_tags_license
+    do_not:
+      - bulk_download_without_license_check
+    license_notes: 各音效许可由上传者设定，必须逐个复核
+    required_phase: 4
+
+  mixkit:
+    name: Mixkit
+    url: https://mixkit.co/
+    integration_mode: [RESOURCE_PROVIDER]
+    role: free_music_sfx_footage
+    status: planned
+    reuse:
+      - stock_video
+      - music
+      - sound_effects
+      - footage_broll       # Phase 6：Mixkit Free License 可商用 B-roll 素材源（§52-84 footage 用途）
+    do_not:
+      - bulk_download_without_license_check
+    license_notes: 免费许可，需遵守平台条款
+    required_phase: 4
+
+  openverse:
+    name: Openverse
+    url: https://github.com/WordPress/openverse
+    integration_mode: [RESOURCE_PROVIDER]
+    role: open_license_media_aggregation
+    status: planned
+    reuse:
+      - open_licensed_image_search
+      - open_licensed_audio_search
+      - footage_still_fallback # Phase 6：无合格 footage 时 IMAGE 候选作 still_fallback（§77）
+    do_not:
+      - bulk_download_without_license_check
+    license_notes: 开放授权聚合检索，素材许可逐个复核
+    required_phase: 4
+
+  cc0-music:
+    name: CC0-1.0-Music
+    url: https://github.com/SoundSafari/CC0-1.0-Music
+    integration_mode: [RESOURCE_PROVIDER]
+    role: cc0_music_corpus
+    status: planned
+    reuse:
+      - cc0_public_domain_music_index
+      - music_cataloging
+    do_not:
+      - bulk_clone_entire_repository
+    license_notes: CC0 / Public Domain，适合做索引而非整体 Clone
+    required_phase: 4
+
+  # ===== Procedural Music（Phase 5 Sound Engine）=====
+  fluidsynth:
+    name: FluidSynth
+    url: https://github.com/FluidSynth/fluidsynth
+    integration_mode: [PROVIDER]
+    role: procedural_music_renderer
+    status: planned
+    reuse:
+      - midi_soundfont_to_audio
+    do_not:
+      - reimplement_synth_engine
+    license_notes: LGPL，调用时注意分发约束
+    required_phase: 5
+
+  generaluser-gs:
+    name: GeneralUser-GS
+    url: https://github.com/mrbumpy409/GeneralUser-GS
+    integration_mode: [RESOURCE_PROVIDER]
+    role: default_gm_soundfont
+    status: planned
+    reuse:
+      - gm_gs_general_soundfont
+    do_not:
+      - bundle_without_license_note
+    license_notes: 通用 GM/GS 音色库，复核许可后使用
+    required_phase: 5
+
+  # ===== Experimental（v0.2 §68 标注 EXPERIMENTAL）=====
+  woosh:
+    name: Woosh
+    url: https://github.com/SonyResearch/Woosh
+    integration_mode: [PROVIDER]
+    role: generative_sfx_experimental
+    status: experimental
+    reuse:
+      - text_to_audio_sfx
+      - video_to_audio_sfx
+    do_not:
+      - use_in_production_without_license_review
+    license_notes: 实验路线，必须保留 License 检查
+    required_phase: 5
+
+# ---------- B. 本机能力（Phase 1 discovered，无需 Clone） ----------
+local_capabilities:
+
+  # remotion 官方技能族（11 个，EXTERNAL_SKILL，Phase 5 Motion Engine 用）
+  remotion_skills:
+    mode: EXTERNAL_SKILL
+    role: remotion_production_skills
+    status: discovered
+    required_phase: 5
+    items:
+      - remotion-best-practices
+      - remotion-captions
+      - remotion-create
+      - remotion-docs
+      - remotion-interactivity
+      - remotion-maps
+      - remotion-markup
+      - remotion-multimedia
+      - remotion-render
+      - remotion-saas
+      - remotion-upgrade
+
+  video-analyst:
+    mode: EXTERNAL_SKILL
+    role: reference_analysis_local_video
+    status: discovered
+    required_phase: 2
+    location: /Users/mac/.agents/skills/video-analyst
+    note: Reference Analysis 阶段调用（ASR / 抽帧 / 分析报告）
+
+  ds-vision-skill:
+    mode: EXTERNAL_SKILL
+    role: visual_fallback
+    status: discovered
+    required_phase: 2
+    location: /Users/mac/.agents/skills/ds-vision-skill
+    note: 识别参考图片 / 截图 / 分镜图等视觉输入
+
+  human-voice:
+    mode: EXTERNAL_SKILL
+    role: voiceover_candidate
+    status: discovered
+    required_phase: 6
+    location: /Users/mac/skills/human-voice
+    note: voiceover 候选能力，Phase 6 Voice-over 流程评估
+
+  yt-dlp:
+    mode: PROVIDER
+    role: video_download_cli
+    status: discovered
+    required_phase: 2
+    location: /Users/mac/skills/yt-dlp
+    note: 参考视频下载 exec；配合 video-analyst 使用，不作为唯一下载方案
+
+  ffmpeg-ffprobe:
+    mode: PROVIDER
+    role: video_probe_normalize_proxy_review
+    status: discovered
+    required_phase: 6
+    location: /opt/homebrew/bin/ffmpeg + /opt/homebrew/bin/ffprobe
+    version: 8.x
+    install: brew install ffmpeg
+    note: Phase 6 运行时依赖（homebrew 8.x）；modules/external-visual 的 probe/
+          normalize/proxy 与 review.machine_checks 全部经 subprocess 调用；
+          缺失时模块输出可读错误而非崩溃（ingestion.py / review.py）
+
+  generative-video-providers-config:
+    mode: PROVIDER
+    role: generative_video_provider_capability_config
+    status: discovered
+    required_phase: 6
+    location: /Users/mac/skills/ZHOU_Videodirector/providers/generative-video/
+    note: provider-neutral 能力配置目录（§28 配置层可写模型名；禁止 endpoint/key
+          占位）。adapters/generative-video.load_providers(config_dir) 读取；
+          template.yaml 为可复制模板；本目录只存能力声明，引擎不调用任何第三方 API。

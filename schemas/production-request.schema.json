@@ -1,0 +1,228 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/production-request.schema.json",
+  "title": "production_request",
+  "description": "生产请求：Production Planner 的输入契约（Phase-5 Prompt §3-§4）。由已批准 Storyboard + Routing + Resource Selection 派生（只吃已批准设计，§5）；每条请求对应一个待产 Asset（一个 Shot / Layer / 资产槽），路由到 Motion / 3D / Sound 引擎之一执行。请求带完整生产要求（视觉/运动/相机/音频）与质量目标，产出后回填 asset 的 request_id。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "project_id",
+    "route",
+    "asset_type",
+    "purpose",
+    "visual_requirements",
+    "motion_requirements",
+    "camera_requirements",
+    "audio_requirements",
+    "duration",
+    "resolution",
+    "fps",
+    "alpha_required",
+    "continuity_group",
+    "editability_policy",
+    "selected_resources",
+    "dependencies",
+    "quality_target",
+    "preview_required",
+    "approval_status",
+    "status"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "pattern": "^PR-\\d{3}$",
+      "description": "生产请求 ID，格式 PR-###；产出 Asset 通过 asset.request_id 回链。"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "所属项目 ID。"
+    },
+    "scene_id": {
+      "type": "string",
+      "description": "关联 Scene ID（可选）。"
+    },
+    "shot_id": {
+      "type": "string",
+      "description": "关联 Shot ID（可选）。"
+    },
+    "layer_id": {
+      "type": "string",
+      "description": "关联 Layer ID（可选，如 S###-L##）。"
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "REMOTION",
+        "THREE_D",
+        "REAL_FOOTAGE",
+        "GENERATIVE_VIDEO",
+        "JY_NATIVE",
+        "HYBRID",
+        "UNDECIDED"
+      ],
+      "description": "技术路由（沿 routing.schema.json route，6 + UNDECIDED）：决定由哪个引擎/通道执行。"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "FULL_SCENE",
+        "MOTION_CLIP",
+        "TRANSPARENT_OVERLAY",
+        "ANIMATED_TEXT",
+        "3D_ELEMENT",
+        "BACKGROUND",
+        "PARTICLE_LAYER",
+        "TRANSITION_ASSET",
+        "INFOGRAPHIC",
+        "UI_COMPONENT",
+        "DECORATIVE_ELEMENT",
+        "FOOTAGE",
+        "IMAGE",
+        "MUSIC",
+        "SFX",
+        "VOICEOVER",
+        "AMBIENCE",
+        "SOUNDFONT"
+      ],
+      "description": "目标资产类型（18 枚举，沿用 asset.schema.json type）。"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "用途：该资产在叙事/画面/声音中的职责（一句话）。"
+    },
+    "visual_requirements": {
+      "type": "string",
+      "description": "视觉要求：构图/色彩/排版/材质等约束，引用 VISUAL_BIBLE。"
+    },
+    "motion_requirements": {
+      "type": "string",
+      "description": "运动要求：动效/节奏/easing/spring/性格等约束，可引用 Motion Family 的 id。"
+    },
+    "camera_requirements": {
+      "type": "string",
+      "description": "相机要求：运镜/景别/镜头语言/运动方式（引用 Visual Bible Camera Language）。"
+    },
+    "audio_requirements": {
+      "type": "string",
+      "description": "音频要求：音乐/SFX/环境音/响度/同步点等，引用 AUDIO_DIRECTION 与 AUDIO_MAP。"
+    },
+    "duration": {
+      "type": "number",
+      "minimum": 0,
+      "description": "时长（秒）。"
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "w",
+        "h"
+      ],
+      "properties": {
+        "w": {
+          "type": "integer",
+          "description": "宽度（像素）。"
+        },
+        "h": {
+          "type": "integer",
+          "description": "高度（像素）。"
+        }
+      },
+      "description": "分辨率（像素），Render Profile 决定实际渲染档位（§99）。"
+    },
+    "fps": {
+      "type": "number",
+      "description": "帧率。"
+    },
+    "alpha_required": {
+      "type": "boolean",
+      "description": "是否需要透明通道：TRANSPARENT_OVERLAY / 3D_ELEMENT 等必为 true，产出时校验 alpha 通道（§20-21）。"
+    },
+    "continuity_group": {
+      "type": "string",
+      "description": "运动连续性分组（沿 shot.continuity_group）：同组连续动画一起 Render，不切碎（§18-19）。"
+    },
+    "editability_policy": {
+      "type": "string",
+      "enum": [
+        "KEEP_EDITABLE",
+        "ASSET_REPLACEABLE",
+        "BAKE"
+      ],
+      "description": "可编辑性策略（3 枚举，沿 routing.bake_policy）：KEEP_EDITABLE=时间线内可调；ASSET_REPLACEABLE=内部烘焙但 Asset 可整体替换；BAKE=整体渲染不可拆。"
+    },
+    "selected_resources": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+:[a-z0-9_-]+:[a-z0-9._-]+$"
+      },
+      "description": "已选 Registry 资源（resource_id，{provider}:{type}:{slug}，来自 resource-selection）；引擎优先对它们 Reuse / Adapt / Compose（§80-82）。"
+    },
+    "dependencies": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "target_id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "依赖类型（如 asset / request / resource）。"
+          },
+          "target_id": {
+            "type": "string",
+            "description": "依赖目标 ID（A### 资产 / PR-### 请求 / resource_id）。"
+          }
+        }
+      },
+      "description": "依赖项：本请求依赖的其他资产/请求/资源（§78 依赖链跟踪）。"
+    },
+    "quality_target": {
+      "type": "string",
+      "enum": [
+        "PREVIEW",
+        "STANDARD",
+        "HIGH",
+        "FINAL"
+      ],
+      "description": "渲染质量档（Render Profile 4 级，§99）：PREVIEW=720p / STANDARD=1080p / HIGH=项目分辨率 / FINAL=交付级；Phase 5 最高到 HIGH，FINAL 留给后续 Phase。"
+    },
+    "preview_required": {
+      "type": "boolean",
+      "description": "是否需要 Preview First（§89-91）：复杂 motion / hero 3D / 昂贵渲染 / 定制音乐默认 true，先低清预览确认再高质量产出。"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "description": "审批状态（Execution Approval，§95-97）：高影响动作须 approved 才执行。"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PLANNED",
+        "WAITING_APPROVAL",
+        "READY",
+        "IN_PROGRESS",
+        "PREVIEW_READY",
+        "REVISION_REQUESTED",
+        "RENDERING",
+        "VALIDATING",
+        "COMPLETED",
+        "FAILED",
+        "BLOCKED"
+      ],
+      "description": "生产状态（11 枚举）：PLANNED=已排期；WAITING_APPROVAL=待审批；READY=可执行；IN_PROGRESS=执行中；PREVIEW_READY=预览已出待确认；REVISION_REQUESTED=被要求修改；RENDERING=高质量渲染中；VALIDATING=校验中；COMPLETED=完成；FAILED=失败（可重试）；BLOCKED=已达重试上限被阻塞。"
+    }
+  }
+}

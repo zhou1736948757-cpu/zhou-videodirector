@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/motion-family.schema.json",
+  "title": "motion_family",
+  "description": "Motion Family：项目级统一动效语言家族（Phase-5 Prompt §15-§17）。一个项目用少量家族统一表达 entry/exit/easing/spring/camera/parallax 等，跨 Shot 保持视觉连续；禁止每个资产独立发明动效语言。MOTION_SPEC 通过家族 id 引用复用（§6），并按需取 hero_variants 做 Hero Effect。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "style",
+    "character",
+    "intensity",
+    "entry_motion",
+    "exit_motion",
+    "easing",
+    "hero_variants",
+    "avoid"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^MF-[A-Z0-9-]+$",
+      "description": "家族 ID，格式 MF-XXX-###（如 MF-MINIMAL-SPATIAL-01）；MOTION_SPEC 与生产请求引用。"
+    },
+    "name": {
+      "type": "string",
+      "description": "家族名称。"
+    },
+    "style": {
+      "type": "string",
+      "description": "所属 Style（引用 VISUAL_BIBLE 的风格标签）。"
+    },
+    "character": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "restrained",
+          "soft",
+          "precise",
+          "spatial",
+          "kinetic",
+          "cinematic",
+          "editorial",
+          "elastic",
+          "mechanical",
+          "organic"
+        ]
+      },
+      "description": "运动性格（10 枚举，可多选）：restrained=克制 / soft=柔和 / precise=精确 / spatial=空间感 / kinetic=动态感 / cinematic=电影感 / editorial=编辑感 / elastic=弹性 / mechanical=机械感 / organic=有机感。"
+    },
+    "intensity": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "HERO"
+      ],
+      "description": "家族基准强度（统一枚举）：LOW=Level 1 微动（大量）/ MEDIUM=Level 2 叙事动效 / HIGH=Level 3 显眼效果 / HERO=极少量英雄效果（§36 三级）。"
+    },
+    "entry_motion": {
+      "type": "string",
+      "description": "入场动效规范：进入方式 / 方向 / 节奏。"
+    },
+    "exit_motion": {
+      "type": "string",
+      "description": "出场动效规范。"
+    },
+    "easing": {
+      "type": "string",
+      "enum": [
+        "linear",
+        "ease",
+        "cubic_bezier",
+        "spring",
+        "custom"
+      ],
+      "description": "家族默认缓动类型（统一枚举）。"
+    },
+    "spring": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stiffness",
+        "damping"
+      ],
+      "properties": {
+        "stiffness": {
+          "type": "number",
+          "description": "Spring 刚度。"
+        },
+        "damping": {
+          "type": "number",
+          "description": "Spring 阻尼。"
+        }
+      },
+      "description": "Spring 参数（easing=spring 时使用，可选）。"
+    },
+    "stagger": {
+      "type": "number",
+      "minimum": 0,
+      "description": "级联延迟（秒）：多元素依次入场的间隔（可选）。"
+    },
+    "camera": {
+      "type": "string",
+      "description": "相机语言：运镜 / 景别 / 镜头节奏（引用 Visual Bible Camera Language，可选）。"
+    },
+    "parallax": {
+      "type": "string",
+      "description": "视差规则：层间相对速度 / 深度位移（可选）。"
+    },
+    "blur_policy": {
+      "type": "string",
+      "description": "模糊策略：何时使用背景 / 入场模糊（可选）。"
+    },
+    "motion_blur_policy": {
+      "type": "string",
+      "description": "运动模糊策略：on / off / 强度条件（可选）。"
+    },
+    "hero_variants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "英雄变体：家族内供 Hero Effect 使用的加强版（如 hero_spring / hero_zoom / hero_wipe），只出现在 Payoff / Climax 等少数位置。"
+    },
+    "avoid": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string"
+      },
+      "description": "家族内禁止使用的手法清单（防模板感 / 防过度）。"
+    }
+  }
+}

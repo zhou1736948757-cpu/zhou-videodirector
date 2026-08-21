@@ -1,0 +1,82 @@
+# resource-selection.yaml — 模板
+# 用途：Resource Registry 的检索输出契约（Phase-4 Prompt §83；schemas/resource-selection.schema.json）。
+# 对每个 resource-request 产出一条 selection（首选 + 备选 + 可解释理由 + 审批 + 获取状态）；
+# 经审批后回填 Asset 生产计划（asset_id 回链，§85-86）。
+# 真源：字段名以 schemas/resource-selection.schema.json 为准；引擎实际输出见 registry.py
+#   build_selection() + candidate_dict()（find --from-requests 命令）。
+# 用法：复制本模板；引擎自动生成时无需手写。BUILD_NEW 必须在 selection_reason 里写明 why existing failed（§109-111）。
+
+# 关联的 resource-request.id（格式 RR-###，pattern ^RR-\d{3}$）。
+request_id: RR-001
+
+selected_resource:
+  # 选中的 resource.id：{provider}:{type}:{slug}（pattern ^[a-z0-9-]+:[a-z0-9_-]+:[a-z0-9._-]+$）。
+  # 示例：remotion-bits:motion_effect:gradient-text-shimmer / polyhaven:hdr:studio_small_09
+  resource_id: provider:type:slug
+  # 资源显示名（引擎 candidate_dict 输出，schema 未列出的引擎扩展字段）。
+  name: ""
+  # 对应 provider.id（小写连字符，pattern ^[a-z0-9-]+$），必须等于 resource_id 的 provider 段。
+  provider: ""
+  # 资源类型（15 枚举，小写：motion_effect | transition | shot_recipe | remotion_component | three_d_model
+  #   | texture | hdri | footage | image | sfx | music | soundfont | font | reference | other）。
+  type: ""
+  # 资源本质（5 枚举，§20）：KNOWLEDGE | CODE | MEDIA | MODEL | PACKAGE
+  #   （引擎扩展字段，来自 resource.schema.json 的 resource_nature）。
+  resource_nature: ""
+  # 为何匹配：对应排序因子（relevance/best_for/style/provider_priority/license/local/dependency/preview）
+  #   的可解释说明（§46 禁止黑盒分数）；引擎输出为命中因子 join 串。
+  why_matched: ""
+  # 最佳用法建议（来自条目的 best_for，如 "product-demo"）。
+  best_use: ""
+  # 潜在问题/风险（如 license 未知、体积大、兼容性存疑、需认证）。
+  potential_problem: ""
+  # 许可证摘要（§89 可解释字段）：结构对应 resource.schema.json license 对象的关键判定字段。
+  #   license_type（如 MIT / CC0-1.0 / CC-BY-4.0；未知必须写 UNKNOWN，§61）；
+  #   commercial_use（是否可商用，未知为 null + license_review_required）；
+  #   attribution_required（是否要求署名，§63 必须记录 attribution 并写入 asset 元数据）。
+  #   注意：schema/引擎输出该字段为字符串（license_summary 摘要），此处为结构化提示形式。
+  license: {license_type: "", commercial_use: null, attribution_required: null}
+  # 估算获取体积（如 "3.2MB" / "≈200KB" / "未知(类型 xxx 估算 lightweight)"）。
+  estimated_fetch_size: ""
+  # 依赖摘要（schema/引擎类型为 string：npm/peer/兼容性要点；模板占位用空列表，填写时用字符串，如 "无"）。
+  dependencies: []
+  # 复用建议（4 枚举，§109-111）：USE_AS_IS=直接用（fit≥0.9）；ADAPT=适配后使用（0.6-0.9）；
+  #   COMPOSE=组合多个资源（0.35-0.6）；BUILD_NEW=自建（<0.35，必须记录 why existing failed）。
+  reuse_recommendation: ADAPT
+  # 自建理由（引擎扩展，对应 build_selection 的 reuse_note）：仅 reuse_recommendation=BUILD_NEW 时必填，
+  #   写清哪个候选、为什么不行；其余情况为 null。
+  build_new_reason: null
+
+# 备选资源（候选多样化，§105-106：覆盖不同 provider/type，禁止全来自同一 provider）。
+# schema 的 items 必填为 resource_id + provider + why_not_chosen（+可选 score 0-1）；
+# 引擎输出字段为 why_not_chosen；模板用 reason 作同义占位，填写时建议用 why_not_chosen 与 schema 对齐。
+alternatives:
+  - resource_id: ""
+    reason: ""
+
+# 选择理由汇总（可审计，≤500 字符；禁止保存私有 Chain-of-Thought）。
+# reuse_recommendation=BUILD_NEW 时必须说明 why existing failed（哪个候选、为什么不行）。
+selection_reason: ""
+
+# 获取审批（§52-56 Approval Gate）：LARGE / EXTERNAL_INSTALL 获取必为 required=true，
+#   理由走 Explain → Size → Why → Alternatives 摘要。
+approval:
+  required: false
+  # 审批状态（3 枚举）：pending | approved | rejected
+  status: pending
+  # 审批理由/要求说明。
+  reason: ""
+
+# 获取/缓存状态（§57-58，5 枚举）：
+#   NOT_CACHED=未缓存任何内容 | METADATA_CACHED=只有 Level 0/1 元数据 | PREVIEW_CACHED=预览已缓存
+#   | PAYLOAD_CACHED=资源本体已缓存 | INSTALLED=已安装（如 SoundFont 装入 FluidSynth 路径）
+fetch_status:
+  state: NOT_CACHED
+  # 本地缓存路径（可选，缓存后存在）。
+  local_path: ""
+  # 下载时间（ISO 8601，可选，下载后存在）。
+  downloaded_at: ""
+
+# 回链到项目 Asset（§85-86，可选）：生产落地后指向 asset.schema.json 的 asset_id（格式 A###）。
+# asset 内写 registry_resource_id 指回本资源的 resource_id；一个 registry resource 可被多个项目引用。
+asset_id: ""

@@ -1,0 +1,314 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/timeline-clip.schema.json",
+  "title": "timeline_clip",
+  "description": "时间线片段：Timeline Manifest 中 clips[]. 的标准结构（Phase-7 Prompt §29 全字段 + §30-37 扩展：asset_slot_id 可替换资产槽、owner/locked 人工协作、proxy_usage 代理/原片映射；§31/§32 proxy 策略、§33-35 资产替换、§108 所有权、§42 motion 属性、§72 转场）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "clip_id",
+    "track_id",
+    "asset_id",
+    "timeline_start_frame",
+    "timeline_end_frame"
+  ],
+  "properties": {
+    "clip_id": {
+      "type": "string",
+      "pattern": "^TC-\\d{3}$",
+      "description": "片段 ID，格式 TC-###（Phase-7 ID 总表）。"
+    },
+    "track_id": {
+      "type": "string",
+      "pattern": "^TR-\\d{3}$",
+      "description": "所属轨道 ID，格式 TR-###（引用 timeline.tracks[].track_id）。"
+    },
+    "asset_id": {
+      "type": "string",
+      "pattern": "^A\\d{3}$",
+      "description": "对应资产 ID，格式 A###（§10：Asset 与 Timeline Clip 不是同一概念，一个 Asset 可被多个 Clip 使用）。"
+    },
+    "asset_slot_id": {
+      "type": "string",
+      "pattern": "^AS-\\d{3}$",
+      "description": "可替换资产槽 ID，格式 AS-###（可选，Phase-7 Prompt §33-34）：保存槽位而非只写死文件名，Asset v2/v3 可整体替换。"
+    },
+    "shot_id": {
+      "type": "string",
+      "pattern": "^S\\d{3}$",
+      "description": "关联 Shot ID（可选，格式 S###）。"
+    },
+    "layer_id": {
+      "type": "string",
+      "description": "关联 Layer ID（可选，如 S001-L01）。"
+    },
+    "timeline_start_frame": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "时间线起始帧（Phase-7 Prompt §25-27 帧安全计时）。"
+    },
+    "timeline_end_frame": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "时间线结束帧（> start_frame）。"
+    },
+    "source_in_frame": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "源素材入点帧（可选，§30 Source Range：原素材 in 必须保留）。"
+    },
+    "source_out_frame": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "源素材出点帧（可选，§30）。"
+    },
+    "speed": {
+      "type": "number",
+      "description": "变速（可选，默认 1.0，如 0.5x / 1.25x）。"
+    },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y"
+      ],
+      "properties": {
+        "x": {
+          "type": "number",
+          "description": "归一化横坐标（0-1，可选）。"
+        },
+        "y": {
+          "type": "number",
+          "description": "归一化纵坐标（0-1，可选）。"
+        }
+      },
+      "description": "位置（可选，归一化坐标）。"
+    },
+    "scale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y"
+      ],
+      "properties": {
+        "x": {
+          "type": "number",
+          "description": "水平缩放（可选）。"
+        },
+        "y": {
+          "type": "number",
+          "description": "垂直缩放（可选）。"
+        }
+      },
+      "description": "缩放（可选）。"
+    },
+    "rotation": {
+      "type": "number",
+      "description": "旋转角度（可选，度）。"
+    },
+    "opacity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "不透明度（可选，0-1）。"
+    },
+    "crop": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "裁剪（可选，结构由 Timeline Backend 定义）。"
+    },
+    "blend_mode": {
+      "type": "string",
+      "description": "混合模式（可选，如 normal / screen / multiply）。"
+    },
+    "mask": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "遮罩（可选）。"
+    },
+    "audio_behavior": {
+      "type": "string",
+      "enum": [
+        "KEEP",
+        "MUTE",
+        "USE_AS_AMBIENCE",
+        "EXTRACT",
+        "REPLACE"
+      ],
+      "description": "音频行为（可选，沿 Phase-6 五枚举，Phase-7 Prompt §84）：KEEP=保留；MUTE=静音；USE_AS_AMBIENCE=作环境音；EXTRACT=提取单独使用；REPLACE=替换。"
+    },
+    "keyframes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "keyframe_id",
+          "frame",
+          "property",
+          "value"
+        ],
+        "properties": {
+          "keyframe_id": {
+            "type": "string",
+            "pattern": "^KF-\\d{3}$",
+            "description": "关键帧 ID，格式 KF-###（Phase-7 ID 总表）。"
+          },
+          "frame": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "关键帧所在帧。"
+          },
+          "property": {
+            "type": "string",
+            "enum": [
+              "POSITION_X",
+              "POSITION_Y",
+              "SCALE",
+              "SCALE_X",
+              "SCALE_Y",
+              "ROTATION",
+              "OPACITY",
+              "VOLUME"
+            ],
+            "description": "动画属性（8 枚举，Phase-7 Prompt §42 motion_property）。"
+          },
+          "value": {
+            "type": "number",
+            "description": "属性值。"
+          },
+          "easing": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "linear",
+                  "ease",
+                  "cubic_bezier",
+                  "spring",
+                  "custom"
+                ],
+                "description": "缓动类型（对齐 motion-family.schema.json easing 枚举）。"
+              },
+              "values": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "description": "缓动参数（可选，如 cubic_bezier 四值）。"
+              }
+            },
+            "description": "关键帧缓动（可选）。"
+          }
+        },
+        "description": "关键帧（可选，Phase-7 Prompt §29 keyframes / §46 简单 Motion 2-3 帧即可）。"
+      },
+      "description": "关键帧列表（可选）。"
+    },
+    "transition_in": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "CUT",
+            "DISSOLVE",
+            "SLIDE",
+            "FADE"
+          ],
+          "description": "转场类型（可选，Phase-7 Prompt §72 transition_basic 四枚举）。"
+        },
+        "duration_frames": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "转场时长（帧，可选）。"
+        }
+      },
+      "description": "入场转场（可选）。"
+    },
+    "transition_out": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "CUT",
+            "DISSOLVE",
+            "SLIDE",
+            "FADE"
+          ],
+          "description": "转场类型（可选，§72）。"
+        },
+        "duration_frames": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "转场时长（帧，可选）。"
+        }
+      },
+      "description": "出场转场（可选）。"
+    },
+    "editable": {
+      "type": "boolean",
+      "description": "是否可编辑（可选，默认 true，Phase-7 Prompt §6-7）。"
+    },
+    "replaceable": {
+      "type": "boolean",
+      "description": "是否可替换（可选，§33-35）。"
+    },
+    "continuity_group": {
+      "type": "string",
+      "description": "连续性组（可选，如 CG-04，§8）：同一组的 Clip 不得拆开破坏连续性。"
+    },
+    "owner": {
+      "type": "string",
+      "enum": [
+        "AI",
+        "HUMAN",
+        "SHARED"
+      ],
+      "description": "所有权（可选，Phase-7 Prompt §108 owner 三枚举）：AI=AI 生成；HUMAN=用户编辑；SHARED=人机共用。"
+    },
+    "locked": {
+      "type": "boolean",
+      "description": "是否锁定（可选，§107 clip_locked）：AI 后续不得修改。"
+    },
+    "proxy_usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy"
+      ],
+      "properties": {
+        "policy": {
+          "type": "string",
+          "enum": [
+            "USE_ORIGINAL",
+            "USE_PROXY_FOR_EDIT",
+            "AUTO"
+          ],
+          "description": "代理策略（Phase-7 Prompt §32 proxy_policy 三枚举）：USE_ORIGINAL=直接用原片；USE_PROXY_FOR_EDIT=编辑用代理；AUTO=按文件大小/编码/性能自动判断。"
+        },
+        "proxy": {
+          "type": "string",
+          "description": "代理文件路径（可选，§31）。"
+        },
+        "original": {
+          "type": "string",
+          "description": "原片文件路径（可选，§31：必须保留 original_asset 映射）。"
+        }
+      },
+      "description": "代理/原片映射（可选，Phase-7 Prompt §31-32）。"
+    },
+    "backend_metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "后端元数据（可选，Phase-7 Prompt §29/§91：backend_version / draft_path / generated_at / warnings / unsupported_features / fallbacks）。"
+    }
+  }
+}

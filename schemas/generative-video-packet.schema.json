@@ -1,0 +1,916 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/generative-video-packet.schema.json",
+  "title": "generative_video_packet",
+  "description": "生成视频生产包：GENERATIVE VIDEO PRODUCTION PACKET 的数据契约（Phase-6 Prompt §9）。任何 AI Video 镜头必须先产生完整 Packet 再生成，禁止只写一句“cinematic …”式描述。Packet 是 Provider-neutral（§25 不写死任何具体视频模型），先描述镜头为何存在（purpose，§10）、主体/环境/构图/相机/灯光/运动/连续性（§11-23），再给出模型可直接消费的 model_ready_prompt 与 negative_prompt、变体策略（§33-34）、参考输入（§24）与评审标准（§36）。版本演化用 packet_version 递增 + supersedes 指向旧版，不换 packet_id（§90-91）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packet_id",
+    "packet_version",
+    "request_id",
+    "shot_id",
+    "layer_id",
+    "purpose",
+    "duration",
+    "aspect_ratio",
+    "resolution",
+    "fps",
+    "subject",
+    "environment",
+    "composition",
+    "framing",
+    "camera",
+    "lens",
+    "camera_movement",
+    "subject_action",
+    "environment_motion",
+    "lighting",
+    "time_of_day",
+    "mood",
+    "style",
+    "material_character",
+    "color_direction",
+    "motion_character",
+    "start_frame",
+    "end_frame",
+    "continuity",
+    "text_safe_area",
+    "overlay_safe_area",
+    "postproduction_plan",
+    "negative_constraints",
+    "model_ready_prompt",
+    "negative_prompt",
+    "variant_strategy",
+    "recommended_variant_count",
+    "reference_inputs",
+    "generation_notes",
+    "review_criteria"
+  ],
+  "properties": {
+    "packet_id": {
+      "type": "string",
+      "pattern": "^GV-\\d{3}$",
+      "description": "生产包 ID，格式 GV-###；版本演化不换 ID，用 packet_version + supersedes（§91）。"
+    },
+    "packet_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "生产包版本（1..n，§91 Prompt Versioning）。"
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^EV-\\d{3}$",
+      "description": "回链 external-visual-request.request_id（EV-###）。"
+    },
+    "shot_id": {
+      "type": "string",
+      "description": "关联 Shot ID（已批准 Storyboard，§3）。"
+    },
+    "layer_id": {
+      "type": "string",
+      "description": "关联 Layer ID（如 S###-L##）。"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "镜头为何存在：叙事/画面职责（§10 Prompt Builder 首先回答 purpose，换模型仍知道核心目标）。"
+    },
+    "duration": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "时长（秒）。"
+    },
+    "aspect_ratio": {
+      "type": "string",
+      "description": "画幅比，如 16:9。"
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "w",
+        "h"
+      ],
+      "properties": {
+        "w": {
+          "type": "integer",
+          "description": "宽度（像素）。"
+        },
+        "h": {
+          "type": "integer",
+          "description": "高度（像素）。"
+        }
+      },
+      "description": "分辨率（像素）。"
+    },
+    "fps": {
+      "type": "number",
+      "description": "帧率。"
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "who_what"
+      ],
+      "properties": {
+        "who_what": {
+          "type": "string",
+          "description": "谁/什么可见：类型/年龄/材质/形状（§11）。"
+        },
+        "prominence": {
+          "type": "string",
+          "description": "主体显著性。"
+        },
+        "must_stay_stable": {
+          "type": "string",
+          "description": "必须保持稳定的外观属性。"
+        }
+      },
+      "description": "主体（复用 external-visual-request.subject 结构，§11）。"
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "location": {
+          "type": "string",
+          "description": "地点。"
+        },
+        "architecture": {
+          "type": "string",
+          "description": "建筑/结构特征。"
+        },
+        "spatial_scale": {
+          "type": "string",
+          "description": "空间尺度。"
+        },
+        "foreground": {
+          "type": "string",
+          "description": "前景元素。"
+        },
+        "midground": {
+          "type": "string",
+          "description": "中景元素。"
+        },
+        "background": {
+          "type": "string",
+          "description": "背景元素。"
+        },
+        "density": {
+          "type": "string",
+          "description": "场景密度。"
+        },
+        "weather": {
+          "type": "string",
+          "description": "天气。"
+        },
+        "atmosphere": {
+          "type": "string",
+          "description": "氛围。"
+        },
+        "surface_materials": {
+          "type": "string",
+          "description": "表面材质。"
+        },
+        "environmental_motion": {
+          "type": "string",
+          "description": "环境有机运动（§18）。"
+        }
+      },
+      "description": "环境（复用 external-visual-request.environment 结构，§12）。"
+    },
+    "composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject_placement": {
+          "type": "string",
+          "description": "主体位置。"
+        },
+        "negative_space": {
+          "type": "string",
+          "description": "留白/负空间。"
+        },
+        "visual_hierarchy": {
+          "type": "string",
+          "description": "视觉层级。"
+        },
+        "depth_layers": {
+          "type": "string",
+          "description": "纵深分层。"
+        },
+        "safe_zones": {
+          "type": "string",
+          "description": "安全区。"
+        },
+        "intended_overlay_area": {
+          "type": "string",
+          "description": "预留叠加区。"
+        }
+      },
+      "description": "构图（§13）。"
+    },
+    "framing": {
+      "type": "string",
+      "description": "取景描述：机位/画幅内主体关系与边界。"
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "shot_size": {
+          "type": "string",
+          "description": "景别。"
+        },
+        "height": {
+          "type": "string",
+          "description": "机位高度。"
+        },
+        "angle": {
+          "type": "string",
+          "description": "角度。"
+        },
+        "movement_speed": {
+          "type": "string",
+          "description": "运镜速度。"
+        },
+        "stabilization": {
+          "type": "string",
+          "description": "稳定风格（§15）。"
+        }
+      },
+      "description": "相机参数（§15；lens 与 camera_movement 为独立顶层字段，见下）。"
+    },
+    "lens": {
+      "type": "string",
+      "enum": [
+        "WIDE",
+        "NORMAL",
+        "TELEPHOTO",
+        "MACRO",
+        "SHALLOW_DOF",
+        "DEEP_FOCUS"
+      ],
+      "description": "镜头性格（§16 6 枚举）：只有必要时才给近似焦段，禁止无意义硬塞。"
+    },
+    "camera_movement": {
+      "type": "string",
+      "enum": [
+        "STATIC",
+        "PUSH_IN",
+        "PULL_OUT",
+        "PAN",
+        "TILT",
+        "ORBIT",
+        "DOLLY",
+        "TRACKING",
+        "CRANE",
+        "HANDHELD",
+        "POV",
+        "COMPLEX",
+        "CUSTOM"
+      ],
+      "description": "运镜（§17 13 枚举）。"
+    },
+    "subject_action": {
+      "type": "string",
+      "description": "主体动作：具体行为/姿态变化，拒绝模糊描述。"
+    },
+    "environment_motion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "people",
+        "cloth",
+        "hair",
+        "smoke",
+        "water",
+        "plants",
+        "crowd",
+        "ambient_objects"
+      ],
+      "properties": {
+        "people": {
+          "type": "string",
+          "description": "人员动效。"
+        },
+        "cloth": {
+          "type": "string",
+          "description": "布料动效。"
+        },
+        "hair": {
+          "type": "string",
+          "description": "头发动效。"
+        },
+        "smoke": {
+          "type": "string",
+          "description": "烟雾动效。"
+        },
+        "water": {
+          "type": "string",
+          "description": "水动效。"
+        },
+        "plants": {
+          "type": "string",
+          "description": "植物动效。"
+        },
+        "crowd": {
+          "type": "string",
+          "description": "人群动效。"
+        },
+        "ambient_objects": {
+          "type": "string",
+          "description": "环境物件动效。"
+        }
+      },
+      "description": "环境有机运动（§18）：8 键分类对象 people/cloth/hair/smoke/water/plants/crowd/ambient_objects，各为字符串；未指定项写空串（对齐 packet_builder 实际输出，FR-005）。"
+    },
+    "lighting": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_direction": {
+          "type": "string",
+          "description": "光源方向。"
+        },
+        "softness": {
+          "type": "string",
+          "description": "软/硬光。"
+        },
+        "contrast": {
+          "type": "string",
+          "description": "对比度。"
+        },
+        "temperature": {
+          "type": "string",
+          "description": "色温。"
+        },
+        "practical": {
+          "type": "boolean",
+          "description": "是否存在实景/实用光源（§19）：true=有实景光源；false=无。"
+        },
+        "volumetric": {
+          "type": "boolean",
+          "description": "是否存在体积光（§19）：true=有体积光；false=无。"
+        },
+        "shadows": {
+          "type": "string",
+          "description": "阴影行为（§19）。"
+        }
+      },
+      "description": "灯光（§19）。"
+    },
+    "time_of_day": {
+      "type": "string",
+      "description": "时段（如 黄昏 / 夜间）。"
+    },
+    "mood": {
+      "type": "string",
+      "description": "情绪基调。"
+    },
+    "style": {
+      "type": "string",
+      "description": "风格（引用 VISUAL_BIBLE 风格标签）。"
+    },
+    "material_character": {
+      "type": "string",
+      "description": "材质性格：主体/环境表面材质质感。"
+    },
+    "color_direction": {
+      "type": "string",
+      "description": "色彩方向：主色/辅色/色板趋势。"
+    },
+    "motion_character": {
+      "type": "string",
+      "description": "运动性格（§20 继承 Visual Bible，禁止默认 dramatic cinematic motion）：如 calm / restrained / dreamlike / energetic / documentary / precise / organic。"
+    },
+    "start_frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "source",
+        "kind"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "description": "起始帧画面状态描述（§21）：有 Continuity Requirement 时必填，如 close shot of single memory card。"
+        },
+        "source": {
+          "type": "string",
+          "description": "状态来源（ev_requirement=来自 EV 请求；derived_default=引擎缺省推导）。"
+        },
+        "kind": {
+          "type": "string",
+          "description": "帧类别（START=起始帧；END=结束帧）。"
+        },
+        "changes_scene": {
+          "type": "boolean",
+          "description": "是否发生场景切换（可选；ev start_frame_requirement 带 changes_scene 时输出，对齐 packet_builder 实际输出，R4）。"
+        }
+      },
+      "description": "起始帧状态（§21）：对象结构 {state, source, kind}，可带可选 changes_scene（对齐 packet_builder 实际输出，FR-007/R4）。"
+    },
+    "end_frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "source",
+        "kind"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "description": "结束帧画面状态描述（§21）：如 camera reveals entire museum hall。"
+        },
+        "source": {
+          "type": "string",
+          "description": "状态来源（ev_requirement / derived_default）。"
+        },
+        "kind": {
+          "type": "string",
+          "description": "帧类别（START=起始帧；END=结束帧）。"
+        },
+        "changes_scene": {
+          "type": "boolean",
+          "description": "是否发生场景切换（可选；ev end_frame_requirement 带 changes_scene 时输出，对齐 packet_builder 实际输出，R4）。"
+        }
+      },
+      "description": "结束帧状态（§21）：对象结构 {state, source, kind}，可带可选 changes_scene（对齐 packet_builder 实际输出，FR-007/R4）。"
+    },
+    "continuity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject_identity": {
+          "type": "string",
+          "description": "主体身份（§22）。"
+        },
+        "wardrobe": {
+          "type": "string",
+          "description": "服装。"
+        },
+        "environment": {
+          "type": "string",
+          "description": "环境。"
+        },
+        "lighting": {
+          "type": "string",
+          "description": "灯光。"
+        },
+        "camera_direction": {
+          "type": "string",
+          "description": "机位方向。"
+        },
+        "movement_direction": {
+          "type": "string",
+          "description": "运动方向。"
+        },
+        "screen_direction": {
+          "type": "string",
+          "description": "银幕方向（§23）。"
+        },
+        "object_position": {
+          "type": "string",
+          "description": "物体位置。"
+        },
+        "time_of_day": {
+          "type": "string",
+          "description": "时段。"
+        },
+        "color": {
+          "type": "string",
+          "description": "色彩。"
+        }
+      },
+      "description": "连续性记录（§22 十项 Checklist）。"
+    },
+    "previous_shot_context": {
+      "type": "string",
+      "description": "上一镜上下文（可选，§23 银幕方向：subject moves left→right）。"
+    },
+    "next_shot_context": {
+      "type": "string",
+      "description": "下一镜上下文（可选，§23，避免无理由 reverse）。"
+    },
+    "text_safe_area": {
+      "type": "string",
+      "description": "文字安全区（§14）：如 Right 35% of frame remains visually quiet。"
+    },
+    "overlay_safe_area": {
+      "type": "string",
+      "description": "叠加安全区：为后期 Remotion / 3D / 图形预留的安静且稳定的区域（§50-51）。"
+    },
+    "postproduction_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "crop": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "note"
+          ],
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "description": "该后期处理项是否必需（§49）。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（意图/处理方式，§49）。"
+            },
+            "owner": {
+              "type": "string",
+              "description": "承担方（可选；如 overlay 的 REMOTION/JY_NATIVE，对齐 packet_builder 实际输出，R4）。"
+            }
+          },
+          "description": "裁剪计划（§49）：{required, note}。"
+        },
+        "stabilization": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "note"
+          ],
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "description": "该后期处理项是否必需（§49）。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（意图/处理方式，§49）。"
+            },
+            "owner": {
+              "type": "string",
+              "description": "承担方（可选；如 overlay 的 REMOTION/JY_NATIVE，对齐 packet_builder 实际输出，R4）。"
+            }
+          },
+          "description": "稳定计划（§49）：{required, note}。"
+        },
+        "speed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "note"
+          ],
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "description": "该后期处理项是否必需（§49）。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（意图/处理方式，§49）。"
+            },
+            "owner": {
+              "type": "string",
+              "description": "承担方（可选；如 overlay 的 REMOTION/JY_NATIVE，对齐 packet_builder 实际输出，R4）。"
+            }
+          },
+          "description": "变速计划（§49）：{required, note}。"
+        },
+        "color": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "note"
+          ],
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "description": "该后期处理项是否必需（§49）。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（意图/处理方式，§49）。"
+            },
+            "owner": {
+              "type": "string",
+              "description": "承担方（可选；如 overlay 的 REMOTION/JY_NATIVE，对齐 packet_builder 实际输出，R4）。"
+            }
+          },
+          "description": "调色计划（Phase 6 不做 Final Grade，只记录意图 §48）：{required, note}。"
+        },
+        "overlay": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "note"
+          ],
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "description": "该后期处理项是否必需（§49）。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（意图/处理方式，§49）。"
+            },
+            "owner": {
+              "type": "string",
+              "description": "承担方（可选；如 overlay 的 REMOTION/JY_NATIVE，对齐 packet_builder 实际输出，R4）。"
+            }
+          },
+          "description": "叠加计划（后期加入的 UI/文字/图形，§7/§50）：{required, note}。"
+        },
+        "mask": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "note"
+          ],
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "description": "该后期处理项是否必需（§49）。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（意图/处理方式，§49）。"
+            },
+            "owner": {
+              "type": "string",
+              "description": "承担方（可选；如 overlay 的 REMOTION/JY_NATIVE，对齐 packet_builder 实际输出，R4）。"
+            }
+          },
+          "description": "遮罩计划（§81 mask/tracking 规划）：{required, note}。"
+        },
+        "text": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "note"
+          ],
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "description": "该后期处理项是否必需（§49）。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（意图/处理方式，§49）。"
+            },
+            "owner": {
+              "type": "string",
+              "description": "承担方（可选；如 overlay 的 REMOTION/JY_NATIVE，对齐 packet_builder 实际输出，R4）。"
+            }
+          },
+          "description": "文字计划（后期字幕/标题）：{required, note}。"
+        },
+        "grain": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "note"
+          ],
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "description": "该后期处理项是否必需（§49）。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（意图/处理方式，§49）。"
+            },
+            "owner": {
+              "type": "string",
+              "description": "承担方（可选；如 overlay 的 REMOTION/JY_NATIVE，对齐 packet_builder 实际输出，R4）。"
+            }
+          },
+          "description": "颗粒计划（§49）：{required, note}。"
+        },
+        "sound": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "note"
+          ],
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "description": "该后期处理项是否必需（§49）。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（意图/处理方式，§49）。"
+            },
+            "owner": {
+              "type": "string",
+              "description": "承担方（可选；如 overlay 的 REMOTION/JY_NATIVE，对齐 packet_builder 实际输出，R4）。"
+            }
+          },
+          "description": "声音计划（§83-84 audio_behavior 决策）：{required, note}。"
+        },
+        "transition": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required",
+            "note"
+          ],
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "description": "该后期处理项是否必需（§49）。"
+            },
+            "note": {
+              "type": "string",
+              "description": "说明（意图/处理方式，§49）。"
+            },
+            "owner": {
+              "type": "string",
+              "description": "承担方（可选；如 overlay 的 REMOTION/JY_NATIVE，对齐 packet_builder 实际输出，R4）。"
+            }
+          },
+          "description": "转场计划（§49）：{required, note}。"
+        }
+      },
+      "description": "后期计划（§49 十项）：生成视频不是 Final，此计划告知后续如何处理；每项 {required:boolean, note:string}，可带可选 owner:string（承担方，如 overlay 的 REMOTION/JY_NATIVE；对齐 packet_builder 实际输出，FR-008/R4）。"
+    },
+    "negative_constraints": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string"
+      },
+      "description": "负面约束清单（明确禁止出现的内容）。"
+    },
+    "model_ready_prompt": {
+      "type": "string",
+      "description": "模型可直接消费的完整提示词（由 Packet 确定性归一化生成，Provider-neutral §25）。"
+    },
+    "negative_prompt": {
+      "type": "string",
+      "description": "负面提示词。"
+    },
+    "variant_strategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "range",
+        "risk_level",
+        "hero_shot",
+        "rationale"
+      ],
+      "properties": {
+        "range": {
+          "type": "string",
+          "enum": [
+            "ONE_TO_TWO",
+            "TWO_TO_FOUR"
+          ],
+          "description": "变体数量档（§33 2 枚举）：1–2 或 2–4，按风险决定，禁止默认 generate 10 variants。"
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ],
+          "description": "生成风险（§34：成本/镜头重要性/prompt 不确定性/连续性难度/人物/复杂运动）。"
+        },
+        "hero_shot": {
+          "type": "boolean",
+          "description": "是否为 Hero Shot（hero 可多一点变体，§34）。"
+        },
+        "rationale": {
+          "type": "string",
+          "description": "档位选择理由（为什么这个范围）。"
+        }
+      },
+      "description": "变体策略（§33-34）。"
+    },
+    "recommended_variant_count": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "建议生成变体数（确定性数值，供成本预估 §31）。"
+    },
+    "reference_inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reference_image": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "$ref": "#/definitions/reference_entry"
+          },
+          "description": "参考图。"
+        },
+        "style_frame": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "$ref": "#/definitions/reference_entry"
+          },
+          "description": "风格帧。"
+        },
+        "character_reference": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "$ref": "#/definitions/reference_entry"
+          },
+          "description": "角色参考（§24，上传涉及隐私须过 Data/Privacy Gate §32）。"
+        },
+        "environment_reference": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "$ref": "#/definitions/reference_entry"
+          },
+          "description": "环境参考。"
+        },
+        "product_reference": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "$ref": "#/definitions/reference_entry"
+          },
+          "description": "产品参考。"
+        },
+        "previous_generated_frame": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "$ref": "#/definitions/reference_entry"
+          },
+          "description": "上一版生成帧（连续性/回归参考）。"
+        }
+      },
+      "description": "参考输入（§24 六类，各为引用条目数组；不要求所有 Provider 支持全部类型，兼容性由 Adapter 决定）。"
+    },
+    "supersedes": {
+      "type": "string",
+      "pattern": "^GV-\\d{3}$",
+      "description": "被本版本替代的旧 Packet ID（可选，指向旧版 packet_id，不换 ID 只加版本，§90-91）。"
+    },
+    "prompt_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "model_ready_prompt + negative_prompt 规范化 JSON 的 sha256（可选，参照 modules/production/planner.py spec hash 语义）。"
+    },
+    "generation_notes": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string"
+      },
+      "description": "生成备注清单（array of strings）：Provider 选择/注意事项/人工流程提示/overload 标记等（对齐 packet_builder 实际输出，FR-011）。结构化记录（如 PRODUCTION_CONFLICT PC-###）一律落独立文件，此字段只写记录 id 引用，禁止整块 JSON 字符串塞入（FR-025）。"
+    },
+    "review_criteria": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string"
+      },
+      "description": "评审标准（§36 18 维度名清单，如 prompt_adherence/composition/...，见 video-review.schema.json dimensions；对齐 packet_builder 实际输出，FR-012）。"
+    }
+  },
+  "definitions": {
+    "reference_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref_id",
+        "path_or_url",
+        "purpose",
+        "required"
+      ],
+      "properties": {
+        "ref_id": {
+          "type": "string",
+          "pattern": "^RF-\\d{3}$",
+          "description": "参考条目 ID，格式 RF-###（Reference Frame Bank 引用，§125-127）。"
+        },
+        "path_or_url": {
+          "type": "string",
+          "description": "参考文件路径或 URL。"
+        },
+        "purpose": {
+          "type": "string",
+          "description": "该参考的用途（如 角色外观锚点 / 环境风格锚点）。"
+        },
+        "required": {
+          "type": "boolean",
+          "description": "是否硬性要求（false=可选参考）。"
+        }
+      }
+    }
+  }
+}

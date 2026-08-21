@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/visual-bible.schema.json",
+  "title": "visual_bible",
+  "description": "视觉圣经：项目视觉最高约束之一，定义色彩、字体、构图、运镜、材质等视觉规范（总设计 v0.2 §9）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "color",
+    "typography",
+    "composition",
+    "whitespace",
+    "motion_character",
+    "camera_language",
+    "lighting",
+    "material",
+    "depth",
+    "dimension_2d_3d",
+    "footage_treatment",
+    "ai_video_treatment",
+    "image_treatment",
+    "subtitle",
+    "transition",
+    "effect_philosophy",
+    "avoid_list"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "视觉圣经标题/标识。"
+    },
+    "color": {
+      "type": "string",
+      "description": "色彩方案说明（Phase 1 允许自由文本描述）。"
+    },
+    "typography": {
+      "type": "string",
+      "description": "字体与排版规范。"
+    },
+    "composition": {
+      "type": "string",
+      "description": "构图规则。"
+    },
+    "whitespace": {
+      "type": "string",
+      "description": "留白策略。"
+    },
+    "motion_character": {
+      "type": "string",
+      "description": "动效性格（速度、缓动、节奏）。"
+    },
+    "camera_language": {
+      "type": "string",
+      "description": "镜头语言。"
+    },
+    "lighting": {
+      "type": "string",
+      "description": "光线方案。"
+    },
+    "material": {
+      "type": "string",
+      "description": "材质方案。"
+    },
+    "depth": {
+      "type": "string",
+      "description": "纵深 / Depth 规范。"
+    },
+    "dimension_2d_3d": {
+      "type": "string",
+      "description": "2D / 3D 维度使用边界。"
+    },
+    "footage_treatment": {
+      "type": "string",
+      "description": "真实素材处理方式。"
+    },
+    "ai_video_treatment": {
+      "type": "string",
+      "description": "AI 视频处理方式。"
+    },
+    "image_treatment": {
+      "type": "string",
+      "description": "图片处理方式。"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "字幕规范。"
+    },
+    "transition": {
+      "type": "string",
+      "description": "转场规范。"
+    },
+    "effect_philosophy": {
+      "type": "string",
+      "description": "特效哲学（何时用、用多少）。"
+    },
+    "avoid_list": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "需要避免的视觉清单。"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+# template.yaml — Generative Video Provider Capability 配置模板（可复制）
+# 用途：在 providers/generative-video/ 下复制本文件并改 provider_id + 字段值，
+#       即注册一个 Generative Video Provider 能力档案（§27 / §28，配置层可写模型名，
+#       核心代码禁止硬编码模型名）。
+# 字段对齐 schemas/generative-video-provider.schema.json（P6-01 契约，§27）。
+# 硬规则：本阶段无真实凭据——禁止填写 API endpoint / key 占位；api_available 一律 false，
+#         状态用 status: unconfigured 或 active（active 仅表示"能力档案可用"，不代表可调用）。
+# 解析：stdlib YAML 子集 / JSON（scripts/registry.py load_json_or_yaml 桥），嵌套用 2 空格缩进。
+
+provider_id: my-provider            # 稳定 ID：^[a-z0-9-]+$（引用 provider.schema.json id 模式）
+name: My Provider Display Name        # 显示名称
+model: UNKNOWN                        # 模型名（未知写 UNKNOWN；不填任何 key/endpoint）
+text_to_video: true                   # 文本→视频能力（true | false | partial）
+image_to_video: false                 # 图→视频能力
+first_last_frame: false               # 首尾帧生成能力（§21）
+reference_image: true                 # 参考图能力（§24）
+character_reference: false            # 角色一致性参考能力（§86）
+camera_control: true                  # 相机/运镜控制能力（§15-17；五值枚举：true|false|partial|manual_or_semiautomatic|requires_authentication，partial=部分控制按支持算）
+duration_options:
+  - 5                                  # 支持的时长（秒）：可写数字列表…
+  - 8
+  # - {min: 3, max: 15}               # …或区间 dict {min, max}
+resolution_options:                   # 支持的分辨率（"WxH" 字符串）
+  - "1280x720"
+  - "1920x1080"
+aspect_ratios:                        # 支持的长宽比（"W:H" 字符串）
+  - "16:9"
+  - "9:16"
+audio_generation: false               # 自带音频生成（§84）
+seed_control: false                   # 随机种子控制（§17 确定性）
+commercial_terms: "商用条款说明：按服务方 ToS 确认；本档案不含任何费用/凭据。"
+api_available: false                  # 是否有可用 API（本阶段一律 false）
+manual_generation_supported: true     # 是否支持人工网页生成（§29 一等公民）
+negative_prompt_supported: true       # 是否支持 negative prompt
+max_prompt_length: 2000               # 最大 prompt 长度（字符）
+notes: "补充说明（能力边界 / 已知限制）。"
+status: unconfigured                  # active | unconfigured | deprecated

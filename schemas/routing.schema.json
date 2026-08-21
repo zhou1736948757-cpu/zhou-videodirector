@@ -1,0 +1,208 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/routing.schema.json",
+  "title": "routing",
+  "description": "技术路由决策：Shot / Layer 的 Capability Router 输出，含评分与决策摘要（Phase-1 Prompt §28）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "target_type",
+    "target_id",
+    "route",
+    "confidence",
+    "scores",
+    "decision_summary",
+    "fallback",
+    "prototype_required",
+    "approval"
+  ],
+  "properties": {
+    "target_type": {
+      "type": "string",
+      "enum": [
+        "shot",
+        "layer"
+      ],
+      "description": "路由目标类型。"
+    },
+    "target_id": {
+      "type": "string",
+      "description": "路由目标 ID（shot.id 或 layer.id）。"
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "REMOTION",
+        "THREE_D",
+        "REAL_FOOTAGE",
+        "GENERATIVE_VIDEO",
+        "JY_NATIVE",
+        "HYBRID",
+        "UNDECIDED"
+      ],
+      "description": "选定的技术路由。"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "置信度（0-1）。"
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "structural_precision",
+        "photorealism",
+        "organic_motion",
+        "scene_entropy",
+        "text_accuracy",
+        "data_accuracy",
+        "revision_requirement",
+        "timing_precision",
+        "atmosphere_requirement",
+        "physical_complexity",
+        "camera_complexity",
+        "editability_requirement"
+      ],
+      "properties": {
+        "structural_precision": {
+          "type": "number",
+          "description": "结构精度需求（0-1）。"
+        },
+        "photorealism": {
+          "type": "number",
+          "description": "照片真实感需求（0-1）。"
+        },
+        "organic_motion": {
+          "type": "number",
+          "description": "有机运动需求（0-1）。"
+        },
+        "scene_entropy": {
+          "type": "number",
+          "description": "画面复杂度需求（0-1）。"
+        },
+        "text_accuracy": {
+          "type": "number",
+          "description": "文字准确性需求（0-1）。"
+        },
+        "data_accuracy": {
+          "type": "number",
+          "description": "数据准确性需求（0-1）。"
+        },
+        "revision_requirement": {
+          "type": "number",
+          "description": "修改需求（0-1）。"
+        },
+        "timing_precision": {
+          "type": "number",
+          "description": "时间精度需求（0-1）。"
+        },
+        "atmosphere_requirement": {
+          "type": "number",
+          "description": "氛围需求（0-1）。"
+        },
+        "physical_complexity": {
+          "type": "number",
+          "description": "物理复杂度（0-1）。"
+        },
+        "camera_complexity": {
+          "type": "number",
+          "description": "相机复杂度（0-1）。"
+        },
+        "editability_requirement": {
+          "type": "number",
+          "description": "可编辑性需求（0-1）。"
+        }
+      },
+      "description": "路由判断指标评分（12 项，0-1）。"
+    },
+    "decision_summary": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "简洁可审计的决策摘要（≤300 字符，禁止保存私有 Chain-of-Thought）。"
+    },
+    "fallback": {
+      "type": "string",
+      "description": "备选路由。"
+    },
+    "prototype_required": {
+      "type": "boolean",
+      "description": "是否需要原型验证。"
+    },
+    "route_source": {
+      "type": "string",
+      "enum": [
+        "AUTO",
+        "USER_OVERRIDE",
+        "DIRECTOR_OVERRIDE",
+        "PROTOTYPE_RESULT"
+      ],
+      "description": "路由决策来源：AUTO=引擎自动判定；USER_OVERRIDE=用户手动指定；DIRECTOR_OVERRIDE=导演/主 Agent 指定；PROTOTYPE_RESULT=由原型验证结果决定（Phase-3 §71-72）。"
+    },
+    "bake_policy": {
+      "type": "string",
+      "enum": [
+        "BAKE",
+        "KEEP_EDITABLE",
+        "ASSET_REPLACEABLE"
+      ],
+      "description": "烘焙策略（Phase-3 §29-30）：BAKE=整体渲染，时间线内无需再改；KEEP_EDITABLE=保持时间线可调；ASSET_REPLACEABLE=内部烘焙但整个 Asset 可在时间线上替换。"
+    },
+    "assembly_backend": {
+      "type": "string",
+      "enum": [
+        "JIANYING",
+        "REMOTION"
+      ],
+      "description": "Hybrid Shot 的组装后端（Phase-3 §55）：长视频通常优先 JIANYING，复杂连续 Motion 可由 REMOTION 组装。"
+    },
+    "prototype_type": {
+      "type": "string",
+      "enum": [
+        "STATIC_KEYFRAME",
+        "REMOTION_MICRO_PROTOTYPE",
+        "THREE_D_PREVIS",
+        "AI_IMAGE_CONCEPT",
+        "AI_VIDEO_TEST",
+        "JY_TIMELINE_TEST"
+      ],
+      "description": "原型类型（Phase-3 §43；prototype_required=true 时给出）。"
+    },
+    "prototype_goal": {
+      "type": "string",
+      "description": "原型验证目标：要验证的假设与通过标准（Phase-3 §43）。"
+    },
+    "supersedes": {
+      "type": "string",
+      "description": "被本次决策替代的旧 route 记录引用；旧记录不删除，保留历史（Phase-3 §73）。"
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approval_id",
+        "status"
+      ],
+      "properties": {
+        "approval_id": {
+          "type": "string",
+          "pattern": "^AP-\\d{3}$",
+          "description": "审批 ID，格式 AP-###，引用 approval.approval_id。"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved",
+            "rejected",
+            "revision_requested",
+            "superseded"
+          ],
+          "description": "审批状态。"
+        }
+      },
+      "description": "路由决策审批引用。"
+    }
+  }
+}

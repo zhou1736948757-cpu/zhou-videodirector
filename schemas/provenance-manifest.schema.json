@@ -1,0 +1,141 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/provenance-manifest.schema.json",
+  "title": "provenance_manifest_entry",
+  "description": "视觉来源清单条目：VISUAL_PROVENANCE_MANIFEST 的单条记录（Phase-6 Prompt §96-97）。记录每个外部视觉资产“从哪来、什么版权、Prompt 是什么、还能不能重新生成、可否商用”（§97）；AI 生成/实拍/用户素材都必须可追溯（§23 Provenance Test）。每条对应一个 Asset（asset_ref），asset.provenance_ref 回链。content_credentials 仅为未来 C2PA 预留的 Metadata Slot（§99，Phase 6 不实现完整 C2PA）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provenance_id",
+    "asset_ref",
+    "source_type",
+    "source",
+    "provider",
+    "model",
+    "prompt_packet_id",
+    "license",
+    "ownership",
+    "generation_date",
+    "original_file",
+    "normalized_file",
+    "usage"
+  ],
+  "properties": {
+    "provenance_id": {
+      "type": "string",
+      "pattern": "^PV-\\d{3}$",
+      "description": "来源条目 ID，格式 PV-###（Phase 6 ID 总表见 work/p6-01/SCHEMA_CONTRACT.md）。"
+    },
+    "asset_ref": {
+      "type": "string",
+      "pattern": "^A\\d{3}$",
+      "description": "对应资产（A###）。"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "API_GENERATED",
+        "WEB_GENERATED",
+        "USER_UPLOAD",
+        "EXTERNAL_TOOL",
+        "FOOTAGE_DOWNLOAD"
+      ],
+      "description": "来源方式（§42-43 5 枚举）：API_GENERATED=API 自动生成；WEB_GENERATED=网页端生成；USER_UPLOAD=用户上传；EXTERNAL_TOOL=外部工具产出；FOOTAGE_DOWNLOAD=素材下载。"
+    },
+    "source": {
+      "type": "string",
+      "description": "来源（URL/站点/来源描述）。"
+    },
+    "provider": {
+      "type": "string",
+      "description": "来源 Provider（provider_id 或 素材来源名称；用户素材标记 user）。"
+    },
+    "model": {
+      "type": "string",
+      "description": "生成模型（未知必须写 UNKNOWN，§43 不要猜；禁止硬编码具体模型名到契约逻辑，§28 仅作为记录值）。"
+    },
+    "prompt_packet_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^GV-\\d{3}$",
+      "description": "生产包引用（GV-###；非生成类素材为 null）。"
+    },
+    "license": {
+      "type": "string",
+      "description": "许可证（如 CC0-1.0 / 未知时必须标记待审，§63 LICENSE_REVIEW_REQUIRED）。"
+    },
+    "ownership": {
+      "type": "string",
+      "enum": [
+        "USER_PROVIDED",
+        "PROJECT",
+        "PURCHASED",
+        "LICENSED",
+        "PUBLIC_DOMAIN",
+        "UNKNOWN"
+      ],
+      "description": "所有权（6 枚举，§68）：USER_PROVIDED=用户自有；PROJECT=项目自产；PURCHASED=付费购买；LICENSED=授权使用；PUBLIC_DOMAIN=公有领域；UNKNOWN=未知（不得当 Commercial Safe）。"
+    },
+    "generation_date": {
+      "type": "string",
+      "description": "生成/收录日期（ISO 8601）。"
+    },
+    "original_file": {
+      "type": "string",
+      "description": "原始文件路径（始终保留原始素材，§47 Original Preservation）。"
+    },
+    "normalized_file": {
+      "type": "string",
+      "description": "标准化后文件路径（无则与 original 相同或空，§44-45 不要无脑重编码）。"
+    },
+    "usage": {
+      "type": "string",
+      "description": "用途说明（该素材在成片中的职责/位置）。"
+    },
+    "source_institution": {
+      "type": "string",
+      "description": "来源机构（可选，§58 Archive Provenance：source institution）。"
+    },
+    "original_page": {
+      "type": "string",
+      "description": "原始页面 URL（可选）。"
+    },
+    "creator": {
+      "type": "string",
+      "description": "创作者（如已知，可选）。"
+    },
+    "retrieval_date": {
+      "type": "string",
+      "description": "收录日期（可选，§58 retrieval date）。"
+    },
+    "content_credentials": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signed",
+        "authority",
+        "note"
+      ],
+      "properties": {
+        "signed": {
+          "type": "boolean",
+          "description": "是否有 C2PA 签名（§99 预留 Metadata Slot，Phase 6 恒为 false）。"
+        },
+        "authority": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "签发机构（未签名为 null）。"
+        },
+        "note": {
+          "type": "string",
+          "description": "备注（预留说明）。"
+        }
+      },
+      "description": "内容凭据（可选，§99）：仅 metadata slot，Phase 6 不实现完整 C2PA。"
+    }
+  }
+}

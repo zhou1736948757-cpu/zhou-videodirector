@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/timeline-patch.schema.json",
+  "title": "timeline_patch",
+  "description": "AI 补丁清单（TIMELINE_PATCH / AI Patch Manifest）：AI 修改已有 Timeline 而不重建整个 Draft 的操作集合（Phase-7 Prompt §102-105）。补丁而非重建（§102）；HUMAN_EDITED 草稿的高风险补丁必须先 Diff + 审批（§104）；不覆盖用户劳动（§106）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "patch_id",
+    "timeline_id",
+    "base_version",
+    "ops",
+    "diff_summary",
+    "status"
+  ],
+  "properties": {
+    "patch_id": {
+      "type": "string",
+      "pattern": "^TP-\\d{3}$",
+      "description": "补丁 ID，格式 TP-###（Phase-7 ID 总表）。"
+    },
+    "timeline_id": {
+      "type": "string",
+      "pattern": "^TL-\\d{3}$",
+      "description": "目标时间线 ID，格式 TL-###。"
+    },
+    "base_version": {
+      "type": "string",
+      "description": "补丁基线版本（§102/§137：如 timeline_v1，diff 必须针对该版本）。"
+    },
+    "ops": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "op",
+          "target"
+        ],
+        "properties": {
+          "op": {
+            "type": "string",
+            "enum": [
+              "replace_asset",
+              "shift_clip",
+              "resize_clip",
+              "change_text",
+              "change_subtitle",
+              "change_audio",
+              "add_clip",
+              "remove_clip",
+              "change_transition"
+            ],
+            "description": "操作类型（Phase-7 Prompt §103 九枚举）。"
+          },
+          "target": {
+            "type": "string",
+            "description": "操作目标（如 clip TC-### / text / subtitle / asset A###）。"
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "操作参数（可选，依 op 而定，如 replace_asset 的新 asset_id / shift_clip 的新 start_frame）。"
+          },
+          "requires_approval": {
+            "type": "boolean",
+            "description": "是否需要审批（可选，默认 false；HUMAN_EDITED 草稿的高风险补丁须 true，§104）。"
+          }
+        },
+        "description": "单个补丁操作（§103）。"
+      },
+      "description": "补丁操作列表（§103，至少 1 条）。"
+    },
+    "diff_summary": {
+      "type": "string",
+      "description": "Diff 摘要（§105：如 '3 clips changed, 1 asset replaced, 2 subtitles modified, music unchanged'）。"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "创建时间（ISO 8601，可选）。"
+    },
+    "status": {
+      "type": "string",
+      "description": "补丁状态（可选取值：pending / needs_approval / applied / rejected / superseded；spec 未给枚举，语义登记入 SCHEMA_CONTRACT7）。"
+    }
+  }
+}

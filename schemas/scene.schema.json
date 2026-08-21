@@ -1,0 +1,151 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/scene.schema.json",
+  "title": "scene",
+  "description": "场景：更大的叙事单元，包含若干镜头（Phase-1 Prompt §22 / 总设计 §18）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "chapter",
+    "order",
+    "title",
+    "narrative_role",
+    "purpose",
+    "target_duration",
+    "shots",
+    "visual_direction",
+    "audio_direction",
+    "approval",
+    "status",
+    "notes"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^SC\\d{3}$",
+      "description": "场景 ID，格式 SC###。"
+    },
+    "chapter": {
+      "type": "string",
+      "description": "所属章节。"
+    },
+    "order": {
+      "type": "integer",
+      "description": "场景顺序。"
+    },
+    "title": {
+      "type": "string",
+      "description": "场景标题。"
+    },
+    "narrative_role": {
+      "type": "string",
+      "description": "叙事角色。"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "场景目标。"
+    },
+    "target_duration": {
+      "type": "number",
+      "description": "目标时长（秒）。"
+    },
+    "shots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "shot_id",
+          "order"
+        ],
+        "properties": {
+          "shot_id": {
+            "type": "string",
+            "pattern": "^S\\d{3}$",
+            "description": "镜头 ID，格式 S###，引用 shot.id。"
+          },
+          "order": {
+            "type": "integer",
+            "description": "镜头在场景内顺序。"
+          }
+        }
+      },
+      "description": "场景内镜头引用列表。"
+    },
+    "visual_direction": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "场景视觉方向的文本描述。"
+        },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "场景视觉方向的结构化对象写法（如 summary / intensity / tempo）。"
+        }
+      ],
+      "description": "场景视觉方向（string 或结构化对象均允许）。"
+    },
+    "audio_direction": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "场景音频方向的文本描述。"
+        },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "场景音频方向的结构化对象写法（如 summary / music_cue / ambience）。"
+        }
+      ],
+      "description": "场景音频方向（string 或结构化对象均允许）。"
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approval_id",
+        "status"
+      ],
+      "properties": {
+        "approval_id": {
+          "type": "string",
+          "pattern": "^AP-\\d{3}$",
+          "description": "审批 ID，格式 AP-###，引用 approval.approval_id。"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved",
+            "rejected",
+            "revision_requested",
+            "superseded"
+          ],
+          "description": "审批状态。"
+        }
+      },
+      "description": "场景审批引用。"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "waiting_user",
+        "approved",
+        "completed",
+        "skipped",
+        "blocked",
+        "failed",
+        "superseded"
+      ],
+      "description": "场景状态。"
+    },
+    "notes": {
+      "type": "string",
+      "description": "备注。"
+    }
+  }
+}

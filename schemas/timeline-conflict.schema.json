@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/timeline-conflict.schema.json",
+  "title": "timeline_conflict",
+  "description": "时间线冲突（TIMELINE_CONFLICT）：Timeline Planner 不擅自改 Storyboard 导演决策；遇到技术性时间冲突时输出本结构（Phase-7 Prompt §23-24）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "conflict_id",
+    "shot_id",
+    "problem",
+    "reason",
+    "current_timing",
+    "required_timing",
+    "recommended_solution",
+    "creative_impact",
+    "approval_required"
+  ],
+  "properties": {
+    "conflict_id": {
+      "type": "string",
+      "pattern": "^TLC-\\d{3}$",
+      "description": "冲突 ID，格式 TLC-###（Phase-7 ID 总表）。"
+    },
+    "shot_id": {
+      "type": "string",
+      "description": "关联 Shot ID（如 S018）。"
+    },
+    "problem": {
+      "type": "string",
+      "description": "问题描述（§24）。"
+    },
+    "reason": {
+      "type": "string",
+      "description": "原因（§24）。"
+    },
+    "current_timing": {
+      "type": "string",
+      "description": "当前计时（§24，如 'S018 = 4.2 sec'）。"
+    },
+    "required_timing": {
+      "type": "string",
+      "description": "技术要求的计时（§24，如 '需要 7.0 sec'）。"
+    },
+    "recommended_solution": {
+      "type": "string",
+      "description": "建议解决方案（§24）。"
+    },
+    "creative_impact": {
+      "type": "string",
+      "description": "创意影响说明（§24）。"
+    },
+    "approval_required": {
+      "type": "boolean",
+      "description": "是否需要审批（§24）。"
+    }
+  }
+}

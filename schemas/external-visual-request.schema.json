@@ -1,0 +1,446 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/external-visual-request.schema.json",
+  "title": "external_visual_request",
+  "description": "外部视觉请求：External Visual Asset Pipeline 的统一输入契约（Phase-6 Prompt §5）。无论最终走 GENERATIVE_VIDEO 还是 REAL_FOOTAGE，都先生成一条 EV 请求；由路由/决策层再派生 generative-video-packet（GV-###）或 footage-request（FR-###）。请求携带完整视觉/相机/灯光/文字安全区/叠加要求与质量目标，approval_status 与 status 共同构成门禁状态机（§31-32 成本与隐私 Gate、§111 Approval Gates）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "project_id",
+    "shot_id",
+    "layer_id",
+    "route",
+    "purpose",
+    "duration",
+    "aspect_ratio",
+    "resolution",
+    "fps",
+    "visual_description",
+    "license_requirements",
+    "quality_target",
+    "editability_policy",
+    "approval_status",
+    "status"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "pattern": "^EV-\\d{3}$",
+      "description": "外部视觉请求 ID，格式 EV-###（Phase 6 ID 总表见 work/p6-01/SCHEMA_CONTRACT.md）。"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "所属项目 ID。"
+    },
+    "scene_id": {
+      "type": "string",
+      "description": "关联 Scene ID（可选）。"
+    },
+    "shot_id": {
+      "type": "string",
+      "description": "关联 Shot ID（已批准 Storyboard，§3）。"
+    },
+    "layer_id": {
+      "type": "string",
+      "description": "关联 Layer ID（如 S###-L##）。"
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "GENERATIVE_VIDEO",
+        "REAL_FOOTAGE"
+      ],
+      "description": "技术路由（沿 routing.schema.json route 枚举，本契约只承载两条 External 分支；HYBRID/REMOTION/3D 不走此请求）。"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "用途：该镜头/层在叙事/画面中的职责（先答“镜头为何存在”，§10）。"
+    },
+    "duration": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "所需时长（秒），必须大于 0。"
+    },
+    "aspect_ratio": {
+      "type": "string",
+      "description": "画幅比，如 16:9 / 9:16。"
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "w",
+        "h"
+      ],
+      "properties": {
+        "w": {
+          "type": "integer",
+          "description": "宽度（像素）。"
+        },
+        "h": {
+          "type": "integer",
+          "description": "高度（像素）。"
+        }
+      },
+      "description": "分辨率（像素）。"
+    },
+    "fps": {
+      "type": "number",
+      "description": "帧率。"
+    },
+    "visual_description": {
+      "type": "string",
+      "description": "视觉描述：构图/色彩/材质/氛围等总体要求，可引用 VISUAL_BIBLE。"
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "who_what"
+      ],
+      "properties": {
+        "who_what": {
+          "type": "string",
+          "description": "谁/什么可见：类型/年龄/材质/形状（§11 精确描述，禁止堆无意义形容词）。"
+        },
+        "prominence": {
+          "type": "string",
+          "description": "主体在画面中的显著性（如 prominent / secondary / background）。"
+        },
+        "must_stay_stable": {
+          "type": "string",
+          "description": "必须保持稳定的外观属性（如产品配色、脸型、发型）。"
+        }
+      },
+      "description": "主体要求（可选，§11）。"
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "location": {
+          "type": "string",
+          "description": "地点（如 记忆博物馆大厅）。"
+        },
+        "architecture": {
+          "type": "string",
+          "description": "建筑/结构特征。"
+        },
+        "spatial_scale": {
+          "type": "string",
+          "description": "空间尺度。"
+        },
+        "foreground": {
+          "type": "string",
+          "description": "前景元素。"
+        },
+        "midground": {
+          "type": "string",
+          "description": "中景元素。"
+        },
+        "background": {
+          "type": "string",
+          "description": "背景元素。"
+        },
+        "density": {
+          "type": "string",
+          "description": "场景密度（空/稀疏/密集）。"
+        },
+        "weather": {
+          "type": "string",
+          "description": "天气。"
+        },
+        "atmosphere": {
+          "type": "string",
+          "description": "氛围（雾气/烟尘/光尘等）。"
+        },
+        "surface_materials": {
+          "type": "string",
+          "description": "表面材质。"
+        },
+        "environmental_motion": {
+          "type": "string",
+          "description": "环境有机运动（人/布料/烟雾/水/植物等，§18）。"
+        }
+      },
+      "description": "环境要求（可选，§12）。"
+    },
+    "composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject_placement": {
+          "type": "string",
+          "description": "主体位置（如 右侧三分之一）。"
+        },
+        "negative_space": {
+          "type": "string",
+          "description": "留白/负空间要求（§51 AI Video Safe Composition）。"
+        },
+        "visual_hierarchy": {
+          "type": "string",
+          "description": "视觉层级。"
+        },
+        "depth_layers": {
+          "type": "string",
+          "description": "纵深分层。"
+        },
+        "safe_zones": {
+          "type": "string",
+          "description": "安全区。"
+        },
+        "intended_overlay_area": {
+          "type": "string",
+          "description": "预留叠加区（后续放 3D / Remotion / 文字的区域，§50-51）。"
+        }
+      },
+      "description": "构图要求（可选，§13）。"
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "shot_size": {
+          "type": "string",
+          "description": "景别。"
+        },
+        "height": {
+          "type": "string",
+          "description": "机位高度。"
+        },
+        "angle": {
+          "type": "string",
+          "description": "角度（平视/俯视/仰视等）。"
+        },
+        "lens": {
+          "type": "string",
+          "description": "镜头性格（§16，避免无意义硬塞焦段）。"
+        },
+        "movement": {
+          "type": "string",
+          "description": "运镜（§17 枚举见 camera_movement）。"
+        },
+        "movement_speed": {
+          "type": "string",
+          "description": "运镜速度。"
+        },
+        "stabilization": {
+          "type": "string",
+          "description": "稳定风格（§15）。"
+        }
+      },
+      "description": "相机要求（可选，§15）。"
+    },
+    "motion": {
+      "type": "string",
+      "description": "运动要求（主体/环境运动总结，可选；详见 subject / environment / camera）。"
+    },
+    "lighting": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_direction": {
+          "type": "string",
+          "description": "光源方向。"
+        },
+        "softness": {
+          "type": "string",
+          "description": "软/硬光。"
+        },
+        "contrast": {
+          "type": "string",
+          "description": "对比度。"
+        },
+        "temperature": {
+          "type": "string",
+          "description": "色温。"
+        },
+        "practical": {
+          "type": "string",
+          "description": "实用光源。"
+        },
+        "volumetric": {
+          "type": "string",
+          "description": "体积光。"
+        },
+        "shadows": {
+          "type": "string",
+          "description": "阴影行为（§19）。"
+        }
+      },
+      "description": "灯光要求（可选，§19）。"
+    },
+    "mood": {
+      "type": "string",
+      "description": "情绪基调。"
+    },
+    "style": {
+      "type": "string",
+      "description": "风格（引用 VISUAL_BIBLE 风格标签）。"
+    },
+    "continuity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subject_identity": {
+          "type": "string",
+          "description": "主体身份一致性（§22）。"
+        },
+        "wardrobe": {
+          "type": "string",
+          "description": "服装一致性。"
+        },
+        "environment": {
+          "type": "string",
+          "description": "环境一致性。"
+        },
+        "lighting": {
+          "type": "string",
+          "description": "灯光一致性。"
+        },
+        "camera_direction": {
+          "type": "string",
+          "description": "机位方向一致性。"
+        },
+        "movement_direction": {
+          "type": "string",
+          "description": "运动方向一致性。"
+        },
+        "screen_direction": {
+          "type": "string",
+          "description": "银幕方向一致性（§23，如 左→右）。"
+        },
+        "object_position": {
+          "type": "string",
+          "description": "物体位置一致性。"
+        },
+        "time_of_day": {
+          "type": "string",
+          "description": "时段一致性。"
+        },
+        "color": {
+          "type": "string",
+          "description": "色彩一致性。"
+        }
+      },
+      "description": "连续性要求（可选，§22 Continuity Checklist）。"
+    },
+    "start_frame_requirement": {
+      "type": "string",
+      "description": "起始帧状态要求（可选，§21，用于 image-to-video / first-last frame 生成）。"
+    },
+    "end_frame_requirement": {
+      "type": "string",
+      "description": "结束帧状态要求（可选，§21）。"
+    },
+    "text_safe_area": {
+      "type": "string",
+      "description": "文字安全区：为后期 Title/Subtitle/UI/图表/标签预留的安静区域（可选，§14）。"
+    },
+    "overlay_requirements": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "class"
+        ],
+        "properties": {
+          "class": {
+            "type": "string",
+            "enum": [
+              "EXACT_UI",
+              "EXACT_TEXT",
+              "EXACT_NUMBER",
+              "LOGO",
+              "DATA",
+              "LABEL"
+            ],
+            "description": "逐字叠加类别（§7 硬规则 6 枚举）：此类内容原则上不能由 AI Video 生成，必须由 Remotion / JianYing 后期叠加。"
+          },
+          "content": {
+            "type": "string",
+            "description": "需要叠加的精确内容（如 具体 UI 文案/数字/Logo 描述）。"
+          },
+          "area": {
+            "type": "string",
+            "description": "预期叠加区域（对应 composition.intended_overlay_area）。"
+          }
+        }
+      },
+      "description": "叠加要求（可选，§50-51）：逐字信息（UI/文字/数字/Logo/数据/标签）必须走后期叠加，AI Video 只负责背景/环境/主体。"
+    },
+    "alpha_requirement": {
+      "type": "boolean",
+      "description": "是否需要透明通道（可选）。"
+    },
+    "audio_requirement": {
+      "type": "string",
+      "description": "音频要求（可选，§83-84 决策依据，如 需保留环境声/须静音）。"
+    },
+    "source_preferences": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string"
+      },
+      "description": "来源偏好（可选）：优先使用的 provider_id / 素材来源清单。"
+    },
+    "license_requirements": {
+      "type": "string",
+      "description": "许可证要求：商用/署名/衍生/再分发硬约束（§62 License 是硬门槛）。"
+    },
+    "quality_target": {
+      "type": "string",
+      "enum": [
+        "PREVIEW",
+        "STANDARD",
+        "HIGH",
+        "FINAL"
+      ],
+      "description": "质量目标（4 枚举，沿 production-request.quality_target，§99 Render Profile 语义）。"
+    },
+    "editability_policy": {
+      "type": "string",
+      "enum": [
+        "KEEP_EDITABLE",
+        "ASSET_REPLACEABLE",
+        "BAKE"
+      ],
+      "description": "可编辑性策略（3 枚举，沿 asset.editability）。"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "revision_requested"
+      ],
+      "description": "审批状态（沿 approval.schema.json status 语义）：高影响动作须 approved 才执行（§111 Approval Gates）。"
+    },
+    "provenance_reference": {
+      "type": "string",
+      "pattern": "^PV-\\d{3}$",
+      "description": "来源追溯引用（可选）：回链 provenance-manifest.provenance_id（PV-###）。"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "approved",
+        "in_progress",
+        "waiting_user",
+        "completed",
+        "blocked"
+      ],
+      "description": "请求生命周期状态（6 枚举）：draft=草稿；approved=已批准；in_progress=执行中；waiting_user=等待用户（manual generation / 素材提交 / 审批）；completed=完成；blocked=已达重试上限被阻塞（§117）。"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "创建时间（ISO 8601，可选）。"
+    }
+  }
+}

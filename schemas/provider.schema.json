@@ -1,0 +1,165 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/provider.schema.json",
+  "title": "provider",
+  "description": "Provider：Registry 的资源来源适配条目（Phase-4 Prompt §11-14）。一条 provider 描述一个外部资源源的接入方式、四项能力矩阵（search/detail/preview/fetch）、认证模型、License 模型、限流预留与状态；只保存元数据，不保存素材本身，也不实现网络代码（adapter 接口见 registry/providers/README.md，P4-3）。",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "capability_value": {
+      "oneOf": [
+        {
+          "type": "boolean",
+          "description": "true=完全支持；false=不支持。"
+        },
+        {
+          "type": "string",
+          "enum": [
+            "partial",
+            "manual_or_semiautomatic",
+            "requires_authentication"
+          ],
+          "description": "部分能力语义：partial=能力有限/不完整；manual_or_semiautomatic=需要人工或半自动介入；requires_authentication=需要认证后才能使用。"
+        }
+      ],
+      "description": "Capability 取值：true | false | partial | manual_or_semiautomatic | requires_authentication。"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "type",
+    "url",
+    "integration_mode",
+    "search_capability",
+    "detail_capability",
+    "preview_capability",
+    "fetch_capability",
+    "authentication",
+    "license_model",
+    "local_cache",
+    "status",
+    "priority",
+    "notes"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Provider 稳定 ID（resource.id 的 provider 段必须匹配此 id），如 remotion-bits / polyhaven / freesound。"
+    },
+    "name": {
+      "type": "string",
+      "description": "Provider 显示名称。"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "LOCAL",
+        "GITHUB",
+        "API",
+        "CLI",
+        "MCP",
+        "WEBSITE",
+        "PACKAGE",
+        "STATIC_INDEX"
+      ],
+      "description": "Provider 类型（8 枚举，§12）。"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Provider 主页/仓库/API 文档 URL。"
+    },
+    "integration_mode": {
+      "type": "string",
+      "enum": [
+        "EXTERNAL_SKILL",
+        "PROVIDER",
+        "KNOWLEDGE_ADAPTER",
+        "ARCHITECTURE_REFERENCE",
+        "TIMELINE_BACKEND",
+        "RESOURCE_PROVIDER"
+      ],
+      "description": "集成模式（6 枚举，沿 Phase 1，见 docs/external-capability-policy.md）；Registry 主要处理 PROVIDER / RESOURCE_PROVIDER / KNOWLEDGE_ADAPTER 的元数据。"
+    },
+    "search_capability": {
+      "$ref": "#/definitions/capability_value",
+      "description": "搜索能力。"
+    },
+    "detail_capability": {
+      "$ref": "#/definitions/capability_value",
+      "description": "详情能力（Level 1 Detail 获取）。"
+    },
+    "preview_capability": {
+      "$ref": "#/definitions/capability_value",
+      "description": "预览能力。"
+    },
+    "fetch_capability": {
+      "$ref": "#/definitions/capability_value",
+      "description": "获取能力（Level 2 Payload）。"
+    },
+    "authentication": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "API_KEY",
+        "OAUTH",
+        "TOKEN",
+        "CREDENTIALS",
+        "UNKNOWN"
+      ],
+      "description": "认证模型（requires_authentication 能力时的认证方式）。"
+    },
+    "license_model": {
+      "type": "string",
+      "description": "许可证模型说明（如 \"CC0 为主\" / \"各条目自带 License，需逐条检查\" / \"部分条目需署名\"）。"
+    },
+    "local_cache": {
+      "type": "boolean",
+      "description": "是否在本地缓存其条目元数据（provider-specific detail cache）。"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "DEGRADED",
+        "BROKEN",
+        "UNKNOWN"
+      ],
+      "description": "Provider 可用状态：ACTIVE=正常；DEGRADED=部分能力受影响；BROKEN=不可用（从候选剔除）；UNKNOWN=未确认。"
+    },
+    "priority": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "搜索优先级（0-100，越高越优先），供 provider_priority 排序因子使用。"
+    },
+    "notes": {
+      "type": "string",
+      "description": "备注（接入方式/ToS 提示/已知限制）。"
+    },
+    "rate_limit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_requests": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "窗口内最大请求数。"
+        },
+        "window_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "限流窗口（秒）。"
+        },
+        "retry_after": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "被限流后建议等待（秒）。"
+        }
+      },
+      "description": "限流预留（可选，§14 rate limit 预留字段）。"
+    }
+  }
+}

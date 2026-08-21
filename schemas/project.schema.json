@@ -1,0 +1,209 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/project.schema.json",
+  "title": "project",
+  "description": "项目级元数据：记录视频项目的需求、交付约束与制作偏好（Phase-1 Prompt §21）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "production_mode",
+    "delivery_mode",
+    "platform",
+    "aspect_ratio",
+    "resolution",
+    "fps",
+    "target_duration",
+    "audience",
+    "primary_goal",
+    "core_message",
+    "language",
+    "voiceover",
+    "reference_sources",
+    "available_assets",
+    "brand_constraints",
+    "style_preferences",
+    "style_avoidances",
+    "ai_video_allowed",
+    "real_footage_allowed",
+    "3d_allowed",
+    "editable_timeline_required",
+    "budget_priority",
+    "quality_priority",
+    "time_priority",
+    "user_notes"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "项目标题。"
+    },
+    "project_type": {
+      "type": "string",
+      "description": "项目类型（Phase-1 Prompt §21 保留字段，与 production_mode 语义一致的别名）。"
+    },
+    "production_mode": {
+      "type": "string",
+      "enum": [
+        "PRODUCT_TECH_SHORT",
+        "EDITORIAL_EXPLAINER",
+        "CUSTOM"
+      ],
+      "description": "生产方式（Production Mode）。"
+    },
+    "delivery_mode": {
+      "type": "string",
+      "enum": [
+        "FINAL_VIDEO_ONLY",
+        "EDITABLE_PROJECT",
+        "BOTH"
+      ],
+      "description": "交付方式（Delivery Mode）。"
+    },
+    "platform": {
+      "type": "string",
+      "description": "目标发布平台。"
+    },
+    "aspect_ratio": {
+      "type": "string",
+      "enum": [
+        "16:9",
+        "9:16",
+        "1:1",
+        "4:3",
+        "21:9"
+      ],
+      "default": "16:9",
+      "description": "画面长宽比。"
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height"
+      ],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "description": "宽度（像素）。"
+        },
+        "height": {
+          "type": "integer",
+          "description": "高度（像素）。"
+        }
+      },
+      "description": "目标分辨率。"
+    },
+    "fps": {
+      "type": "number",
+      "description": "帧率。"
+    },
+    "target_duration": {
+      "type": "number",
+      "description": "目标时长（秒）。"
+    },
+    "audience": {
+      "type": "string",
+      "description": "目标观众。"
+    },
+    "primary_goal": {
+      "type": "string",
+      "description": "主要目标。"
+    },
+    "core_message": {
+      "type": "string",
+      "description": "核心信息。"
+    },
+    "language": {
+      "type": "string",
+      "description": "语言。"
+    },
+    "voiceover": {
+      "type": "boolean",
+      "description": "是否使用旁白。"
+    },
+    "reference_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "参考来源（链接或路径）。"
+    },
+    "available_assets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "用户已有可用素材。"
+    },
+    "brand_constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "品牌约束。"
+    },
+    "style_preferences": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "风格偏好。"
+    },
+    "style_avoidances": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "需要避免的风格。"
+    },
+    "ai_video_allowed": {
+      "type": "boolean",
+      "description": "是否允许 AI 生成视频。"
+    },
+    "real_footage_allowed": {
+      "type": "boolean",
+      "description": "是否允许真实素材。"
+    },
+    "3d_allowed": {
+      "type": "boolean",
+      "description": "是否允许 3D。"
+    },
+    "editable_timeline_required": {
+      "type": "boolean",
+      "description": "是否必须提供可编辑时间线。"
+    },
+    "budget_priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "description": "预算优先程度。"
+    },
+    "quality_priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "description": "质量优先程度。"
+    },
+    "time_priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "description": "时间（速度）优先程度。"
+    },
+    "user_notes": {
+      "type": "string",
+      "description": "用户补充说明。"
+    }
+  }
+}

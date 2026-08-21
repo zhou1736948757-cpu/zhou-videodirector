@@ -1,0 +1,159 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/generative-video-provider.schema.json",
+  "title": "generative_video_provider",
+  "description": "生成视频 Provider 能力档案（Phase-6 Prompt §27）：描述一个 AI Video 模型/服务的接入能力矩阵。provider_id 引用 provider.schema.json 的 id 段（不重复 Provider 管理系统，§108）；model 未知时写 UNKNOWN，禁止猜（§43）；核心必须 Provider-neutral，禁止在契约/代码中硬编码具体视频模型名（§25/§28）。能力档案决定 Adapter 兼容性：Packet 的参考输入（§24）、变体与 Prompt 策略据此降级或标注 manual（§29）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider_id",
+    "name",
+    "model",
+    "text_to_video",
+    "image_to_video",
+    "first_last_frame",
+    "reference_image",
+    "character_reference",
+    "camera_control",
+    "duration_options",
+    "resolution_options",
+    "aspect_ratios",
+    "audio_generation",
+    "seed_control",
+    "commercial_terms",
+    "api_available",
+    "manual_generation_supported"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Provider 稳定 ID（引用 provider.schema.json id 模式，如 generative-video / open-source-video）。"
+    },
+    "name": {
+      "type": "string",
+      "description": "Provider 显示名称（与 provider.schema.json name 语义一致，R4：generative-video-provider 全部 yaml 配置均携带，设为 required）。"
+    },
+    "model": {
+      "type": "string",
+      "description": "具体模型标识；未知必须写 UNKNOWN（§43 不要猜）。"
+    },
+    "text_to_video": {
+      "type": "boolean",
+      "description": "是否支持文本生视频。"
+    },
+    "image_to_video": {
+      "type": "boolean",
+      "description": "是否支持图生视频。"
+    },
+    "first_last_frame": {
+      "type": "boolean",
+      "description": "是否支持首尾帧生成（§21 对应 start/end frame 连续性需求）。"
+    },
+    "reference_image": {
+      "type": "boolean",
+      "description": "是否支持参考图（reference_image / style_frame）。"
+    },
+    "character_reference": {
+      "type": "boolean",
+      "description": "是否支持角色参考（character_reference，§24/§86 Character Continuity）。"
+    },
+    "camera_control": {
+      "type": [
+        "boolean",
+        "string"
+      ],
+      "enum": [
+        true,
+        false,
+        "partial",
+        "manual_or_semiautomatic",
+        "requires_authentication"
+      ],
+      "description": "相机控制能力（§17 运镜枚举的可执行程度）：true=完全支持；false=不支持；partial=能力有限/不完整；manual_or_semiautomatic=需要人工或半自动介入；requires_authentication=需要认证后才能使用（五值对齐 provider.schema.json capability_value，FR-001/FR-028）。"
+    },
+    "duration_options": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "min",
+          "max"
+        ],
+        "properties": {
+          "min": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "最短时长（秒）。"
+          },
+          "max": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "最长时长（秒）。"
+          }
+        }
+      },
+      "description": "支持的时长档位（区间对象数组，如 [{min: 3, max: 15}]；对齐 manual-web.yaml 实际输出，FR-002）。"
+    },
+    "resolution_options": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string"
+      },
+      "description": "支持的分辨率档位（如 720p / 1080p / 4K）。"
+    },
+    "aspect_ratios": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string"
+      },
+      "description": "支持的画幅比（如 16:9 / 9:16）。"
+    },
+    "audio_generation": {
+      "type": "boolean",
+      "description": "是否自带音频生成（§84 自带音频不能默认使用，须按 audio_behavior 决策）。"
+    },
+    "seed_control": {
+      "type": "boolean",
+      "description": "是否支持种子控制（确定性/复现）。"
+    },
+    "commercial_terms": {
+      "type": "string",
+      "description": "商用条款说明（商用权/衍生权/署名要求，§62 License 是硬门槛）。"
+    },
+    "api_available": {
+      "type": "boolean",
+      "description": "是否提供合法 API（§30 Assisted Workflow 前置；无 API 走 §29 Manual Generation）。"
+    },
+    "manual_generation_supported": {
+      "type": "boolean",
+      "description": "是否支持人工网页端生成（§29 一等公民流程，user returns file → Asset Ingestion）。"
+    },
+    "negative_prompt_supported": {
+      "type": "boolean",
+      "description": "是否支持负面提示词（可选）。"
+    },
+    "max_prompt_length": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "提示词最大长度（字符，可选）。"
+    },
+    "notes": {
+      "type": "string",
+      "description": "备注（接入方式/ToS/已知限制，可选）。"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "unconfigured",
+        "deprecated"
+      ],
+      "description": "Provider 配置状态（可选）：active=已配置可用；unconfigured=未配置（只能 manual/assisted，§116 默认不要假设 AUTOMATED）；deprecated=已弃用。"
+    }
+  }
+}

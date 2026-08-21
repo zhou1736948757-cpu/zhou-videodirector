@@ -1,0 +1,39 @@
+{
+  "motion": [
+    "minimal",
+    "spatial",
+    "kinetic",
+    "cinematic",
+    "editorial",
+    "soft",
+    "fast",
+    "elastic",
+    "glitch",
+    "organic",
+    "technical"
+  ],
+  "sfx": [
+    "soft",
+    "sharp",
+    "digital",
+    "organic",
+    "airy",
+    "heavy",
+    "low-frequency",
+    "bright",
+    "premium",
+    "retro",
+    "mechanical"
+  ],
+  "three_d": [
+    "photoreal",
+    "stylized",
+    "low-poly",
+    "product",
+    "architecture",
+    "nature",
+    "technology",
+    "interior",
+    "prop"
+  ]
+}

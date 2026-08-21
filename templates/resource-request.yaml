@@ -1,0 +1,67 @@
+# resource-request.yaml — 模板
+# 用途：Resource Registry 的检索输入契约（Phase-4 Prompt §82；schemas/resource-request.schema.json）。
+# 由 Router 读取 Phase-3 routing 输出（routing/S###.yaml + layers/S###.yaml）生成（scripts/registry.py 的
+#   request --from-routing 命令）；也可人工手写。HYBRID Shot 必须按 Layer role/route 拆多个 request，
+#   不产模糊单 query（§114-115）。
+# 真源：字段名以 schemas/resource-request.schema.json 为准；引擎实际产出见 registry.py generate_requests()。
+# 每条请求一个 YAML 文件（RR-###.yaml），或合并为 requests 目录下多个文件；引擎 load_requests() 支持
+#   单个文件、目录、或带 requests[] 列表的文件。
+# 用法：复制本模板后填写；request_id 由引擎按序生成（RR-###，全局递增），人工场景不可复用。
+
+# 请求 ID：格式 RR-###（schema pattern: ^RR-\d{3}$），全局唯一、递增、永不复用。
+request_id: RR-001
+# 所属项目 ID（通常为项目目录名，引擎自动填入）。
+project_id: ""
+# 关联 Scene ID（可选；如 SC001）。
+scene_id: ""
+# 关联 Shot ID（可选；如 S001）。
+shot_id: ""
+# 关联 Layer ID（可选；HYBRID 按层拆分时必填，格式 S###-L##，如 S001-L01）。
+layer_id: ""
+# 目标资源类型子集（15 枚举，schema 真源）：
+#   MOTION_EFFECT | TRANSITION | SHOT_RECIPE | REMOTION_COMPONENT | THREE_D_MODEL
+#   | TEXTURE | HDRI | FOOTAGE | IMAGE | SFX | MUSIC | SOUNDFONT | FONT | REFERENCE | OTHER
+# 最少 1 个；route-aware 默认映射见 registry.py ROUTE_TYPE_MAP。
+resource_types: [MOTION_EFFECT]
+# 资源需求描述（≤500 字符）：用一句人类可读的话说明要什么、什么语境（引擎拼装 Shot 视觉描述/屏文）。
+description: ""
+# 风格要求：schema/引擎类型为 string（来自 VISUAL_BIBLE 的风格标签，空格分隔），供 style 排序因子使用（§43）。
+# 引擎会从项目 VISUAL_BIBLE 自动提取，人工可覆盖；模板占位用空列表，填写时用字符串（如 "minimal tech"）。
+style: []
+# 技术要求自由文本（schema/引擎类型为 string，如 "支持 4k 透明通道" / "需要可编辑文字层"）。
+# 注意：引擎在 bake_policy=KEEP_EDITABLE 时自动写 "需要可编辑层（禁止 bake）"。
+technical_requirements: {}
+# 许可证要求自由文本（schema/引擎类型为 string，如 "CC0 或可商用"）。
+# 引擎默认 "CC0 或可商用"；含 "商用" 会触发商业过滤（§62，license_mode=commercial）。
+# 项目商用会过滤掉 commercial_use=false 或 license_type=UNKNOWN 的资源。
+# 模板附加的 commercial_use_required 为提示用，非 schema 字段：true 表示必须可商用。
+license_requirements: {commercial_use_required: false}
+# 体积偏好（4 枚举，与 Fetch 分类对齐）：LIGHTWEIGHT | MEDIUM | LARGE | ANY
+size_preference: ANY
+# 质量偏好（4 枚举）：LOW | MEDIUM | HIGH | ANY
+quality_preference: ANY
+# 是否优先本地已有资源（local_only 过滤开关，true 时只搜已缓存条目）。
+local_preferred: false
+# 偏好 Provider 列表（provider.id，小写连字符，如 remotion-bits / polyhaven），提升 provider_priority 因子。
+provider_preferences: []
+# 要避免的资源 id 列表（如已知不适合的家族/条目，直接剔除）。
+avoid: []
+# 引擎扩展（registry.py generate_requests() 实际产出，非 schema 字段）：
+#   VISUAL_BIBLE 提取的避免风格词列表，供 build_selection() 的 avoid 过滤使用。人工写请求可省略。
+avoid_style_tokens: []
+# Phase-3 route（7 枚举，schema 真源）：REMOTION | THREE_D | REAL_FOOTAGE | GENERATIVE_VIDEO
+#   | JY_NATIVE | HYBRID | UNDECIDED
+# 用于 route-aware 搜索：影响候选资源类型/权重（§43-44，见 ROUTE_TYPE_MAP）。
+route: ""
+# 烘焙策略（3 枚举，§107）：BAKE | KEEP_EDITABLE | ASSET_REPLACEABLE
+#   KEEP_EDITABLE 时不得推荐不可拆 Bake 的资源（须可拆为可编辑层/Asset）。
+#   引擎在高可编辑性 Shot 上自动填 KEEP_EDITABLE。
+bake_policy: ""
+# 连续性分组（Phase-1 continuity_group，可选）：同组请求倾向同一来源/家族，保证视觉连续性（§118-121 family 复用）。
+continuity_group: null
+# 创建时间（ISO 8601，如 2026-08-13T10:00:00+08:00；引擎自动填）。
+created_at: ""
+# 请求状态（schema 5 枚举：OPEN | IN_PROGRESS | SELECTED | FULFILLED | CANCELLED）：
+#   OPEN=待检索；IN_PROGRESS=检索中；SELECTED=已选资源；FULFILLED=已获取/落地为 Asset；CANCELLED=取消。
+# 模板示例用小写 open（引擎 norm_enum 接受大小写变体），填写时建议用规范大写。
+status: open

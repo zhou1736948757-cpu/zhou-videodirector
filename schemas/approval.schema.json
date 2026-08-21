@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/approval.schema.json",
+  "title": "approval",
+  "description": "审批记录：保存用户对阶段/决策的确认历史，禁止删除历史审批（Phase-1 Prompt §13 + §20）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "approval_id",
+    "scope",
+    "target",
+    "status",
+    "decision",
+    "user_feedback",
+    "created_at",
+    "supersedes"
+  ],
+  "properties": {
+    "approval_id": {
+      "type": "string",
+      "pattern": "^AP-\\d{3}$",
+      "description": "审批 ID，格式 AP-###。"
+    },
+    "scope": {
+      "type": "string",
+      "description": "审批范围，如 visual_bible / shot / routing。"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "目标类型，如 project / scene / shot / layer / routing。"
+        },
+        "id": {
+          "type": "string",
+          "description": "目标 ID。"
+        }
+      },
+      "description": "审批目标。"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "revision_requested",
+        "superseded"
+      ],
+      "description": "审批状态。"
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary"
+      ],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "决策摘要。"
+        },
+        "details": {
+          "type": "string",
+          "description": "决策细节（可选）。"
+        }
+      },
+      "description": "决策内容。"
+    },
+    "user_feedback": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "用户反馈列表。"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "创建时间（ISO 8601）。"
+    },
+    "supersedes": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "approval_id",
+              "reason"
+            ],
+            "properties": {
+              "approval_id": {
+                "type": "string",
+                "pattern": "^AP-\\d{3}$",
+                "description": "被替代的审批 ID。"
+              },
+              "reason": {
+                "type": "string",
+                "description": "替代原因。"
+              }
+            }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "被替代的审批 ID 列表（简化形式）。"
+        }
+      ],
+      "description": "被本审批替代的历史审批。"
+    },
+    "source_stage": {
+      "type": "string",
+      "enum": [
+        "INIT",
+        "PROJECT_INTAKE",
+        "PROJECT_BRIEF_REVIEW",
+        "REFERENCE_ANALYSIS",
+        "REFERENCE_REVIEW",
+        "CREATIVE_DIRECTION",
+        "CREATIVE_REVIEW",
+        "STYLE_DIRECTION",
+        "VISUAL_BIBLE_REVIEW",
+        "SOUND_DIRECTION",
+        "AUDIO_DIRECTION_REVIEW",
+        "EDITORIAL_DIRECTION",
+        "STORY_REVIEW",
+        "STORYBOARD",
+        "STORYBOARD_REVIEW",
+        "SUBAGENT_CONFIGURATION",
+        "SHOT_ROUTING",
+        "LAYER_ROUTING",
+        "RESOURCE_PLANNING",
+        "PRODUCTION_PLAN_REVIEW",
+        "ASSET_ACQUISITION",
+        "ASSET_PRODUCTION",
+        "TIMELINE_BUILD",
+        "TIMELINE_REVIEW",
+        "PREVIEW",
+        "QA",
+        "CHANGE_REVIEW",
+        "FINAL_EDIT",
+        "FINAL_RENDER",
+        "COMPLETE"
+      ],
+      "description": "审批来源阶段（可选，取值须为状态机 stage ID）。"
+    }
+  }
+}

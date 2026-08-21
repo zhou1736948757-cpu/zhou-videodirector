@@ -1,0 +1,86 @@
+# approvals.yaml — 新项目初始快照（INIT）
+# 用途：机器可读的 Approval Current State（Phase-1 §20）。
+# 初始状态：project 下 10 个 requires_approval 阶段全部 not_started；scenes / shots / assets 均为空。
+# 状态枚举：not_started | pending | approved | rejected | revision_requested | superseded
+# 字段说明：
+#   status         审批状态
+#   approval_id    最近一次审批的 AP-NNN；未审批为 null
+#   decision       用户决定摘要；未审批为 null
+#   user_feedback  用户反馈列表；未审批为 []
+#   created_at     审批发生时间（ISO8601）；未审批为 null
+#   supersedes     被本审批替代的旧 approval_id 列表
+
+project:
+  project_brief:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  reference_analysis:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  creative_direction:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  visual_bible:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  audio_direction:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  story_structure:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  storyboard:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  production_plan:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  timeline_plan:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+  final_qa:
+    status: not_started
+    approval_id: null
+    decision: null
+    user_feedback: []
+    created_at: null
+    supersedes: []
+scenes: {}
+shots: {}
+assets: {}
